@@ -1,0 +1,21 @@
+app_id: nimiplatform.vane
+display_name: Vane
+version: 0.1.1
+profile: standalone
+manifest_role: submitted-input
+app_access:
+  - runtime.consume
+capability_contract_refs:
+  - text.generate
+  - text.embed
+required_standardized_feature_refs: []
+storage_policy:
+  kind: nimi-mediated-default
+metadata:
+  summary: Search, research and read documents with Nimi-managed AI.
+  icon: public/icon.png
+  readme: README.md
+  release_notes: RELEASE_NOTES.md
+local_development:
+  electron:
+    renderer_origin: http://127.0.0.1:1480

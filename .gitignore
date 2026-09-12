@@ -39,3 +39,11 @@ db.sqlite
 /searxng
 
 certificates
+# Nimi App development
+dist-electron/
+dist-electron-package/
+.nimi/local/
+.vite/
+
+# Local Nimi candidate overrides (remove before release)
+/pnpm-workspace.yaml

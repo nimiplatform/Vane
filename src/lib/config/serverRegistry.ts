@@ -1,15 +1,7 @@
-import configManager from './index';
-import { ConfigModelProvider } from './types';
+import { readSettings } from '../../nimi/storage';
 
-export const getConfiguredModelProviders = (): ConfigModelProvider[] => {
-  return configManager.getConfig('modelProviders', []);
+export const getSearxngURL = async () => {
+  const settings = await readSettings();
+  if (!settings.searxngURL) throw new Error('Open Vane Settings and configure a SearxNG search service.');
+  return settings.searxngURL;
 };
-
-export const getConfiguredModelProviderById = (
-  id: string,
-): ConfigModelProvider | undefined => {
-  return getConfiguredModelProviders().find((p) => p.id === id) ?? undefined;
-};
-
-export const getSearxngURL = () =>
-  configManager.getConfig('search.searxngURL', '');

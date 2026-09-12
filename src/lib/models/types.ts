@@ -68,8 +68,8 @@ type StreamTextOutput = {
   done?: boolean;
 };
 
-type GenerateObjectInput = {
-  schema: z.ZodTypeAny;
+type GenerateObjectInput<T extends z.ZodType = z.ZodType> = {
+  schema: T;
   messages: Message[];
   options?: GenerateOptions;
 };

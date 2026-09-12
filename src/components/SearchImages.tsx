@@ -1,3 +1,5 @@
+import { vane } from '@/nimi/client';
+import { toast } from 'sonner';
 /* eslint-disable @next/next/no-img-element */
 import { ImagesIcon, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -33,29 +35,8 @@ const SearchImages = ({
           onClick={async () => {
             setLoading(true);
 
-            const chatModelProvider = localStorage.getItem(
-              'chatModelProviderId',
-            );
-            const chatModel = localStorage.getItem('chatModelKey');
-
-            const res = await fetch(`/api/images`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                query: query,
-                chatHistory: chatHistory,
-                chatModel: {
-                  providerId: chatModelProvider,
-                  key: chatModel,
-                },
-              }),
-            });
-
-            const data = await res.json();
-
-            const images = data.images ?? [];
+            try {
+            const images = await vane.images(query, chatHistory);
             setImages(images);
             setSlides(
               images.map((image: Image) => {
@@ -64,7 +45,8 @@ const SearchImages = ({
                 };
               }),
             );
-            setLoading(false);
+            } catch (error) { toast.error(error instanceof Error ? error.message : String(error)); }
+            finally { setLoading(false); }
           }}
           className="border border-dashed border-light-200 dark:border-dark-200 hover:bg-light-200 dark:hover:bg-dark-200 active:scale-95 duration-200 transition px-4 py-2 flex flex-row items-center justify-between rounded-lg dark:text-white text-sm w-full"
         >

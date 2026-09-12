@@ -1,121 +1,41 @@
-import BaseEmbedding from "../models/base/embedding";
-import UploadManager from "./manager";
-import computeSimilarity from "../utils/computeSimilarity";
-import { Chunk } from "../types";
-import { hashObj } from '../utils/hash';
-
-type UploadStoreParams = {
-    embeddingModel: BaseEmbedding<any>;
-    fileIds: string[];
-}
-
-type StoreRecord = {
-    embedding: number[];
-    content: string;
-    fileId: string;
-    metadata: Record<string, any>
-}
+import UploadManager from './manager';
+import computeSimilarity from '../utils/computeSimilarity';
+import type { Chunk } from '../types';
+import type BaseEmbedding from '../models/base/embedding';
 
 class UploadStore {
-    embeddingModel: BaseEmbedding<any>;
-    fileIds: string[];
-    records: StoreRecord[] = [];
+  constructor(private params: { embeddingModel: BaseEmbedding<any>; fileIds: string[] }) {}
 
-    constructor(private params: UploadStoreParams) {
-        this.embeddingModel = params.embeddingModel;
-        this.fileIds = params.fileIds;
-        this.initializeStore()
+  async query(queries: string[], topK: number): Promise<Chunk[]> {
+    const vectors = await this.params.embeddingModel.embedText(queries);
+    const spaceId = this.params.embeddingModel.spaceId;
+    const records: { chunk: Chunk; embedding: number[] }[] = [];
+    for (const fileId of this.params.fileIds) {
+      const file = await UploadManager.getFile(fileId);
+      if (!spaceId || file.embeddingSpaceId !== spaceId) throw new Error(`${file.fileName} was indexed with a different embedding model. Clear the old attachments and upload them again to rebuild the index.`);
+      for (const item of await UploadManager.getFileChunks(fileId)) {
+        records.push({ embedding: item.embedding, chunk: {
+          content: item.content, metadata: { fileId, fileName: file.fileName, title: file.fileName, url: `file_id://${fileId}` },
+        } });
+      }
     }
-
-    initializeStore() {
-        this.fileIds.forEach((fileId) => {
-            const file = UploadManager.getFile(fileId)
-
-            if (!file) {
-                throw new Error(`File with ID ${fileId} not found`);
-            }
-
-            const chunks = UploadManager.getFileChunks(fileId);
-
-            this.records.push(...chunks.map((chunk) => ({
-                embedding: chunk.embedding,
-                content: chunk.content,
-                fileId: fileId,
-                metadata: {
-                    fileName: file.name,
-                    title: file.name,
-                    url: `file_id://${file.id}`,
-                }
-            })))
-        })
+    const scores = new Map<number, number>();
+    for (const vector of vectors) {
+      const ranked = records.map((record, index) => {
+        if (record.embedding.length !== vector.length) throw new Error('Document vector dimensions do not match the current Nimi model. Rebuild the index.');
+        return { index, score: computeSimilarity(vector, record.embedding) };
+      }).sort((a, b) => b.score - a.score);
+      ranked.forEach((item, rank) => scores.set(item.index, (scores.get(item.index) ?? 0) + item.score / (61 + rank)));
     }
+    return [...scores.entries()].sort(([, a], [, b]) => b - a).slice(0, topK).map(([index]) => records[index].chunk);
+  }
 
-    async query(queries: string[], topK: number): Promise<Chunk[]> {
-        const queryEmbeddings = await this.embeddingModel.embedText(queries)
-
-        const results: { chunk: Chunk; score: number; }[][] = [];
-        const hashResults: string[][] = []
-
-        await Promise.all(queryEmbeddings.map(async (query) => {
-            const similarities = this.records.map((record, idx) => {
-                return {
-                    chunk: {
-                        content: record.content,
-                        metadata: {
-                            ...record.metadata,
-                            fileId: record.fileId,
-                        }
-                    },
-                    score: computeSimilarity(query, record.embedding)
-                } as { chunk: Chunk; score: number; };
-            }).sort((a, b) => b.score - a.score)
-
-            results.push(similarities)
-            hashResults.push(similarities.map(s => hashObj(s)))
-        }))
-
-        const chunkMap: Map<string, Chunk> = new Map();
-        const scoreMap: Map<string, number> = new Map();
-        const k = 60;
-
-        for (let i = 0; i < results.length; i++) {
-            for (let j = 0; j < results[i].length; j++) {
-                const chunkHash = hashResults[i][j]
-
-                chunkMap.set(chunkHash, results[i][j].chunk);
-                scoreMap.set(chunkHash, (scoreMap.get(chunkHash) || 0) + results[i][j].score / (j + 1 + k));
-            }
-        }
-
-        const finalResults = Array.from(scoreMap.entries())
-            .sort((a, b) => b[1] - a[1])
-            .map(([chunkHash, _score]) => {
-                return chunkMap.get(chunkHash)!;
-            })
-
-        return finalResults.slice(0, topK);
-    }
-
-    static getFileData(fileIds: string[]): { fileName: string; initialContent: string }[] {
-        const filesData: { fileName: string; initialContent: string }[] = [];
-
-        fileIds.forEach((fileId) => {
-            const file = UploadManager.getFile(fileId)
-
-            if (!file) {
-                throw new Error(`File with ID ${fileId} not found`);
-            }
-
-            const chunks = UploadManager.getFileChunks(fileId);
-
-            filesData.push({
-                fileName: file.name,
-                initialContent: chunks.slice(0, 3).map(c => c.content).join('\n---\n'),
-            })
-        })
-
-        return filesData
-    }
+  static async getFileData(fileIds: string[]): Promise<{ fileName: string; initialContent: string }[]> {
+    return Promise.all(fileIds.map(async (id) => {
+      const file = await UploadManager.getFile(id);
+      const chunks = await UploadManager.getFileChunks(id);
+      return { fileName: file.fileName, initialContent: chunks.slice(0, 3).map((chunk) => chunk.content).join('\n---\n') };
+    }));
+  }
 }
-
-export default UploadStore
+export default UploadStore;

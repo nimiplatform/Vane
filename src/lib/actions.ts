@@ -1,31 +1,15 @@
-export const getSuggestions = async (chatHistory: [string, string][]) => {
-  const chatModel = localStorage.getItem('chatModelKey');
-  const chatModelProvider = localStorage.getItem('chatModelProviderId');
-
-  const res = await fetch(`/api/suggestions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      chatHistory,
-      chatModel: {
-        providerId: chatModelProvider,
-        key: chatModel,
-      },
-    }),
-  });
-
-  const data = (await res.json()) as { suggestions: string[] };
-
-  return data.suggestions;
-};
+import { vane } from '@/nimi/client';
+export const getSuggestions = (chatHistory: [string, string][]) =>
+  vane.suggestions(chatHistory);
 
 export const getApproxLocation = async () => {
   const res = await fetch('https://free.freeipapi.com/api/json', {
     method: 'GET',
+    signal: AbortSignal.timeout(10000),
   });
 
+  if (!res.ok)
+    throw new Error('The approximate location service is unavailable.');
   const data = await res.json();
 
   return {

@@ -37,7 +37,11 @@ const Sources = () => {
     <Popover className="relative">
       {({ open }) => (
         <>
-          <PopoverButton className="flex items-center justify-center active:border-none hover:bg-light-200 hover:dark:bg-dark-200 p-2 rounded-lg focus:outline-none text-black/50 dark:text-white/50 active:scale-95 transition duration-200 hover:text-black dark:hover:text-white">
+          <PopoverButton
+            aria-label="Search sources"
+            title="Search sources"
+            className="flex items-center justify-center active:border-none hover:bg-light-200 hover:dark:bg-dark-200 p-2 rounded-lg focus:outline-none text-black/50 dark:text-white/50 active:scale-95 transition duration-200 hover:text-black dark:hover:text-white"
+          >
             <GlobeIcon className="h-[18px] w-auto" />
           </PopoverButton>
           <AnimatePresence>
@@ -70,6 +74,7 @@ const Sources = () => {
                         <p className="text-xs">{source.name}</p>
                       </div>
                       <Switch
+                        aria-label={source.name}
                         checked={sources.includes(source.key)}
                         className="group relative flex h-4 w-7 shrink-0 cursor-pointer rounded-full bg-light-200 dark:bg-white/10 p-0.5 duration-200 ease-in-out focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed data-[checked]:bg-sky-500 dark:data-[checked]:bg-sky-500"
                       >

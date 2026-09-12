@@ -473,8 +473,8 @@ const Stock = (props: StockWidgetProps) => {
                   Dividend Yield
                 </span>
                 <span className="text-xs text-black dark:text-white font-medium">
-                  {props.dividendYield
-                    ? `${formatNumber(props.dividendYield * 100, 2)}%`
+                  {props.dividendYield != null
+                    ? `${formatNumber(props.dividendYield, 2)}%`
                     : 'N/A'}
                 </span>
               </div>
@@ -492,7 +492,12 @@ const Stock = (props: StockWidgetProps) => {
                   Volume
                 </span>
                 <span className="text-xs text-black dark:text-white font-medium">
-                  {formatLargeNumber(props.regularMarketVolume)}
+                  {props.regularMarketVolume == null
+                    ? 'N/A'
+                    : new Intl.NumberFormat(undefined, {
+                        notation: 'compact',
+                        maximumFractionDigits: 2,
+                      }).format(props.regularMarketVolume)}
                 </span>
               </div>
               <div className="flex justify-between p-3 border-t border-light-200 dark:border-dark-200">

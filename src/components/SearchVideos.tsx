@@ -1,3 +1,5 @@
+import { vane } from '@/nimi/client';
+import { toast } from 'sonner';
 /* eslint-disable @next/next/no-img-element */
 import { PlayCircle, PlayIcon, PlusIcon, VideoIcon } from 'lucide-react';
 import { useRef, useState } from 'react';
@@ -48,40 +50,25 @@ const Searchvideos = ({
           onClick={async () => {
             setLoading(true);
 
-            const chatModelProvider = localStorage.getItem(
-              'chatModelProviderId',
-            );
-            const chatModel = localStorage.getItem('chatModelKey');
-
-            const res = await fetch(`/api/videos`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                query: query,
-                chatHistory: chatHistory,
-                chatModel: {
-                  providerId: chatModelProvider,
-                  key: chatModel,
-                },
-              }),
-            });
-
-            const data = await res.json();
-
-            const videos = data.videos ?? [];
-            setVideos(videos);
-            setSlides(
-              videos.map((video: Video) => {
-                return {
-                  type: 'video-slide',
-                  iframe_src: video.iframe_src,
-                  src: video.img_src,
-                };
-              }),
-            );
-            setLoading(false);
+            try {
+              const videos = await vane.videos(query, chatHistory);
+              setVideos(videos);
+              setSlides(
+                videos.map((video: Video) => {
+                  return {
+                    type: 'video-slide',
+                    iframe_src: video.iframe_src,
+                    src: video.img_src,
+                  };
+                }),
+              );
+            } catch (error) {
+              toast.error(
+                error instanceof Error ? error.message : String(error),
+              );
+            } finally {
+              setLoading(false);
+            }
           }}
           className="border border-dashed border-light-200 dark:border-dark-200 hover:bg-light-200 dark:hover:bg-dark-200 active:scale-95 duration-200 transition px-4 py-2 flex flex-row items-center justify-between rounded-lg dark:text-white text-sm w-full"
         >
@@ -100,6 +87,17 @@ const Searchvideos = ({
               className="bg-light-secondary dark:bg-dark-secondary h-32 w-full rounded-lg animate-pulse aspect-video object-cover"
             />
           ))}
+        </div>
+      )}
+      {!loading && videos?.length === 0 && (
+        <div
+          role="status"
+          className="rounded-lg border border-light-200 dark:border-dark-200 p-3 text-sm"
+        >
+          <p>No videos found for this question.</p>
+          <button className="mt-2 text-sky-500" onClick={() => setVideos(null)}>
+            Search again
+          </button>
         </div>
       )}
       {videos !== null && videos.length > 0 && (

@@ -10,6 +10,7 @@ const schema = z.object({
 const academicSearchDescription = `
 Use this tool to perform academic searches for scholarly articles, papers, and research studies relevant to the user's query. Provide a list of concise search queries that will help gather comprehensive academic information on the topic at hand.
 You can provide up to 3 queries at a time. Make sure the queries are specific and relevant to the user's needs.
+For a named paper, first search its exact title in double quotes. Do not add instructions such as "summarize" or "cite" to the query. A paper that merely references the requested work is not the original; simplify a failed query instead of repeating it.
 
 For example, if the user is interested in recent advancements in renewable energy, your queries could be:
 1. "Recent advancements in renewable energy 2024"

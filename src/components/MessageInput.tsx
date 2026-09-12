@@ -1,12 +1,13 @@
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import AttachSmall from './MessageInputActions/AttachSmall';
 import { useChat } from '@/lib/hooks/useChat';
 
 const MessageInput = () => {
-  const { loading, sendMessage } = useChat();
+  const { loading, sendMessage, cancel } = useChat();
 
   const [copilotEnabled, setCopilotEnabled] = useState(false);
   const [message, setMessage] = useState('');
@@ -48,8 +49,8 @@ const MessageInput = () => {
   return (
     <form
       onSubmit={(e) => {
-        if (loading) return;
         e.preventDefault();
+        if (loading) return;
         sendMessage(message);
         setMessage('');
       }}
@@ -76,6 +77,7 @@ const MessageInput = () => {
         className="transition bg-transparent dark:placeholder:text-white/50 placeholder:text-sm text-sm dark:text-white resize-none focus:outline-none w-full px-2 max-h-24 lg:max-h-36 xl:max-h-48 flex-grow flex-shrink"
         placeholder="Ask a follow-up"
       />
+      {loading && <button type="button" aria-label="Stop research" onClick={() => void cancel().catch((error) => toast.error(error.message))} className="rounded-full bg-light-200 p-2 dark:bg-dark-200"><Square size={17} /></button>}
       {mode === 'single' && (
         <button
           disabled={message.trim().length === 0 || loading}

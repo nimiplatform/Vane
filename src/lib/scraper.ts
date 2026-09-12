@@ -1,116 +1,47 @@
+import { BrowserWindow } from 'electron';
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
-import { Mutex } from 'async-mutex';
+import { vaneContext } from '../nimi/context';
 
 class Scraper {
-  private static browser: any | undefined;
-  private static IDLE_KILL_TIMEOUT = 30000;
-  private static NAVIGATION_TIMEOUT = 20000;
-  private static idleTimeout: NodeJS.Timeout | undefined;
-  private static browserMutex = new Mutex();
-  private static userCount = 0;
-
-  private static async initBrowser() {
-    await this.browserMutex.runExclusive(async () => {
-      if (!this.browser) {
-        const { chromium } = await import('playwright');
-        this.browser = await chromium.launch({
-          headless: true,
-          channel: 'chromium-headless-shell',
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--disable-blink-features=AutomationControlled',
-          ],
-        });
-      }
-
-      if (this.idleTimeout) clearTimeout(this.idleTimeout);
+  static async scrape(value: string): Promise<{ content: string; title: string }> {
+    const url = new URL(value);
+    if (!['https:', 'http:'].includes(url.protocol)) throw new Error('Web page reading requires an HTTP or HTTPS URL.');
+    const { signal } = vaneContext();
+    const window = new BrowserWindow({
+      show: false,
+      webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false, partition: `vane-reader-${crypto.randomUUID()}` },
     });
-  }
-
-  private static scheduleIdleKill() {
-    if (this.idleTimeout) clearTimeout(this.idleTimeout);
-
-    this.idleTimeout = setTimeout(async () => {
-      await this.browserMutex.runExclusive(async () => {
-        if (this.browser && this.userCount === 0) {
-          {
-            await this.browser.close();
-            this.browser = undefined;
-          }
-        }
-      });
-    }, this.IDLE_KILL_TIMEOUT);
-  }
-
-  static async scrape(
-    url: string,
-  ): Promise<{ content: string; title: string }> {
-    await this.initBrowser();
-
-    if (!this.browser) throw new Error('Browser not initialized');
-
-    const context = await this.browser.newContext({
-      userAgent:
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-    });
-
-    await context.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-    });
-
-    const page = await context.newPage();
-
-    this.userCount++;
-
+    window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    window.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
+    const close = () => { if (!window.isDestroyed()) window.destroy(); };
+    signal.addEventListener('abort', close, { once: true });
+    const timeout = setTimeout(close, 25_000);
     try {
-      await page.goto(url, {
-        waitUntil: 'domcontentloaded',
-        timeout: this.NAVIGATION_TIMEOUT,
+      signal.throwIfAborted();
+      await new Promise<void>((resolve, reject) => {
+        window.webContents.once('dom-ready', () => resolve());
+        void window.loadURL(url.toString()).catch(reject);
       });
-
-      await page
-        .waitForLoadState('load', { timeout: 5000 })
-        .catch(() => undefined);
-      await page.waitForTimeout(500);
-
-      const html = await page.content();
-
-      const dom = new JSDOM(html, {
-        url,
-      });
-
-      const content = new Readability(dom.window.document).parse();
-
-      const title = await page.title();
-
-      return {
-        content: `
-        # ${title ?? 'No title'} - ${url}
-        ${content?.textContent?.trim() ?? 'No content available'}
-        `,
-        title,
-      };
-    } catch (err) {
-      console.log(`Error scraping ${url}:`, err);
-
-      return {
-        title: 'Failed to scrape',
-        content: `# ${url}\n\nError scraping content.`,
-      };
+      signal.throwIfAborted();
+      const title = window.webContents.getTitle();
+      const html = await window.webContents.mainFrame.executeJavaScript('document.documentElement.outerHTML') as string;
+      signal.throwIfAborted();
+      const document = new JSDOM(html, { url: url.toString() });
+      try {
+        const article = new Readability(document.window.document).parse();
+        const text = article?.textContent?.trim();
+        if (!text) throw new Error(`No readable article was found at ${url.hostname}.`);
+        return { title, content: `# ${title}\n\n${text}` };
+      } finally { document.window.close(); }
+    } catch (error) {
+      signal.throwIfAborted();
+      throw new Error(`Vane could not read ${url.hostname}. Try the page again or use another URL.`, { cause: error });
     } finally {
-      this.userCount--;
-
-      await context.close().catch(() => undefined);
-
-      if (this.userCount === 0) {
-        this.scheduleIdleKill();
-      }
+      clearTimeout(timeout);
+      signal.removeEventListener('abort', close);
+      close();
     }
   }
 }
-
 export default Scraper;

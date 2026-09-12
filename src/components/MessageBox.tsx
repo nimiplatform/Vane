@@ -1,7 +1,9 @@
 'use client';
 
 /* eslint-disable @next/next/no-img-element */
-import React, { MutableRefObject } from 'react';
+import React, { MutableRefObject, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { cn } from '@/lib/utils';
 import {
   BookCopy,
@@ -23,7 +25,7 @@ import ThinkBox from './ThinkBox';
 import { useChat, Section } from '@/lib/hooks/useChat';
 import Citation from './MessageRenderer/Citation';
 import AssistantSteps from './AssistantSteps';
-import { ResearchBlock } from '@/lib/types';
+import { ResearchBlock, type Chunk } from '@/lib/types';
 import Renderer from './Widgets/Renderer';
 import CodeBlock from './MessageRenderer/CodeBlock';
 
@@ -69,6 +71,11 @@ const MessageBox = ({
   );
 
   const sources = sourceBlocks.flatMap((block) => block.data);
+  const [fileSource, setFileSource] = useState<Chunk | null>(null);
+  const openFile = (url: string) =>
+    setFileSource(
+      sources.find((source) => source.metadata.url === url) ?? null,
+    );
 
   const hasContent = section.parsedTextBlocks.length > 0;
 
@@ -99,12 +106,39 @@ const MessageBox = ({
       },
       citation: {
         component: Citation,
+        props: { onOpenFile: openFile },
       },
     },
   };
 
   return (
     <div className="space-y-6">
+      <Dialog
+        open={fileSource !== null}
+        onClose={() => setFileSource(null)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+        <div className="fixed inset-0 overflow-y-auto p-4 flex items-center justify-center">
+          <DialogPanel className="w-full max-w-2xl rounded-2xl border border-light-200 dark:border-dark-200 bg-light-primary dark:bg-dark-primary p-6 text-black dark:text-white shadow-xl">
+            <DialogTitle className="text-lg font-semibold">
+              {fileSource?.metadata.title}
+            </DialogTitle>
+            <p className="mt-2 text-sm text-black/60 dark:text-white/60">
+              Passages retrieved from your uploaded document.
+            </p>
+            <div className="my-5 max-h-[60vh] overflow-y-auto whitespace-pre-wrap break-words text-sm leading-relaxed">
+              {fileSource?.content}
+            </div>
+            <button
+              onClick={() => setFileSource(null)}
+              className="rounded-lg border border-light-200 dark:border-dark-200 px-4 py-2 text-sm"
+            >
+              Close
+            </button>
+          </DialogPanel>
+        </div>
+      </Dialog>
       <div className={'w-full pt-8 break-words'}>
         <h2 className="text-black dark:text-white font-medium text-3xl lg:w-9/12">
           {section.message.query}
@@ -124,7 +158,7 @@ const MessageBox = ({
                   Sources
                 </h3>
               </div>
-              <MessageSources sources={sources} />
+              <MessageSources sources={sources} onOpenFile={openFile} />
             </div>
           )}
 
@@ -158,6 +192,24 @@ const MessageBox = ({
             )}
 
           {section.widgets.length > 0 && <Renderer widgets={section.widgets} />}
+          {section.message.errorMessage && (
+            <p
+              role="status"
+              className="rounded-lg border border-amber-500/30 p-3 text-sm text-amber-600 dark:text-amber-300"
+            >
+              {section.message.errorMessage === 'ai-config-invalid' ? (
+                <>
+                  Vane needs an available AI model.{' '}
+                  <Link className="underline" to="/settings?section=ai">
+                    Open AI models
+                  </Link>{' '}
+                  to configure one, then try your request again.
+                </>
+              ) : (
+                section.message.errorMessage
+              )}
+            </p>
+          )}
 
           <div className="flex flex-col space-y-2">
             {sources.length > 0 && (
@@ -170,7 +222,11 @@ const MessageBox = ({
                   size={20}
                 />
                 <h3 className="text-black dark:text-white font-medium text-xl">
-                  Answer
+                  {['error', 'canceled', 'interrupted'].includes(
+                    section.message.status,
+                  )
+                    ? 'Partial answer'
+                    : 'Answer'}
                 </h3>
               </div>
             )}

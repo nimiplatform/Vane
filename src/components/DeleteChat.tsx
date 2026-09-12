@@ -1,3 +1,4 @@
+import { vane } from '@/nimi/client';
 import { Trash } from 'lucide-react';
 import {
   Description,
@@ -29,23 +30,14 @@ const DeleteChat = ({
   const handleDelete = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/chats/${chatId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (res.status != 200) {
-        throw new Error('Failed to delete chat');
-      }
+      await vane.chats.delete(chatId);
 
       const newChats = chats.filter((chat) => chat.id !== chatId);
 
       setChats(newChats);
 
       if (redirect) {
-        window.location.href = '/';
+        window.location.hash = '/';
       }
     } catch (err: any) {
       toast.error(err.message);

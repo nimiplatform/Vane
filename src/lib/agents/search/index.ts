@@ -4,54 +4,10 @@ import { classify } from './classifier';
 import Researcher from './researcher';
 import { getWriterPrompt } from '@/lib/prompts/search/writer';
 import { WidgetExecutor } from './widgets';
-import db from '@/lib/db';
-import { messages } from '@/lib/db/schema';
-import { and, eq, gt } from 'drizzle-orm';
 import { TextBlock } from '@/lib/types';
-import { getTokenCount } from '@/lib/utils/splitText';
 
 class SearchAgent {
   async searchAsync(session: SessionManager, input: SearchAgentInput) {
-    const exists = await db.query.messages.findFirst({
-      where: and(
-        eq(messages.chatId, input.chatId),
-        eq(messages.messageId, input.messageId),
-      ),
-    });
-
-    if (!exists) {
-      await db.insert(messages).values({
-        chatId: input.chatId,
-        messageId: input.messageId,
-        backendId: session.id,
-        query: input.followUp,
-        createdAt: new Date().toISOString(),
-        status: 'answering',
-        responseBlocks: [],
-      });
-    } else {
-      await db
-        .delete(messages)
-        .where(
-          and(eq(messages.chatId, input.chatId), gt(messages.id, exists.id)),
-        )
-        .execute();
-      await db
-        .update(messages)
-        .set({
-          status: 'answering',
-          backendId: session.id,
-          responseBlocks: [],
-        })
-        .where(
-          and(
-            eq(messages.chatId, input.chatId),
-            eq(messages.messageId, input.messageId),
-          ),
-        )
-        .execute();
-    }
-
     const classification = await classify({
       chatHistory: input.chatHistory,
       enabledSources: input.config.sources,
@@ -90,14 +46,16 @@ class SearchAgent {
       });
     }
 
-    const [widgetOutputs, searchResults] = await Promise.all([
+    const results = await Promise.allSettled([
       widgetPromise,
       searchPromise,
     ]);
+    const failure = results.find((result) => result.status === 'rejected');
+    if (failure?.status === 'rejected') throw failure.reason;
+    const widgetOutputs = (results[0] as PromiseFulfilledResult<Awaited<typeof widgetPromise>>).value;
+    const searchResults = (results[1] as PromiseFulfilledResult<ResearcherOutput | null>).value;
 
-    session.emit('data', {
-      type: 'researchComplete',
-    });
+    if (!searchPromise) session.emit('data', { type: 'researchComplete', reason: 'no-search' });
 
     let finalContext =
       '<Query to be answered without searching; Search not made>';
@@ -142,6 +100,7 @@ class SearchAgent {
     let responseBlockId = '';
 
     for await (const chunk of answerStream) {
+      if (!chunk.contentChunk) continue;
       if (!responseBlockId) {
         const block: TextBlock = {
           id: crypto.randomUUID(),
@@ -171,21 +130,7 @@ class SearchAgent {
       }
     }
 
-    session.emit('end', {});
 
-    await db
-      .update(messages)
-      .set({
-        status: 'completed',
-        responseBlocks: session.getAllBlocks(),
-      })
-      .where(
-        and(
-          eq(messages.chatId, input.chatId),
-          eq(messages.messageId, input.messageId),
-        ),
-      )
-      .execute();
   }
 }
 

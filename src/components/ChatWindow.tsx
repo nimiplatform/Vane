@@ -3,24 +3,12 @@
 import Navbar from './Navbar';
 import Chat from './Chat';
 import EmptyChat from './EmptyChat';
-import NextError from 'next/error';
 import { useChat } from '@/lib/hooks/useChat';
 import SettingsButtonMobile from './Settings/SettingsButtonMobile';
 import { Block } from '@/lib/types';
 import Loader from './ui/Loader';
 
-export interface BaseMessage {
-  chatId: string;
-  messageId: string;
-  createdAt: Date;
-}
-
-export interface Message extends BaseMessage {
-  backendId: string;
-  query: string;
-  responseBlocks: Block[];
-  status: 'answering' | 'completed' | 'error';
-}
+export type { ResearchMessage as Message } from '@/nimi/contracts';
 
 export interface File {
   fileName: string;
@@ -34,7 +22,7 @@ export interface Widget {
 }
 
 const ChatWindow = () => {
-  const { hasError, notFound, messages, isReady } = useChat();
+  const { hasError, errorMessage, notFound, messages, isReady } = useChat();
 
   if (hasError) {
     return (
@@ -44,7 +32,7 @@ const ChatWindow = () => {
         </div>
         <div className="flex flex-col items-center justify-center min-h-screen">
           <p className="dark:text-white/70 text-black/70 text-sm">
-            Failed to connect to the server. Please try again later.
+            {errorMessage}
           </p>
         </div>
       </div>
@@ -53,7 +41,7 @@ const ChatWindow = () => {
 
   return isReady ? (
     notFound ? (
-      <NextError statusCode={404} />
+      <p className="p-8">This chat was not found.</p>
     ) : (
       <div>
         {messages.length > 0 ? (

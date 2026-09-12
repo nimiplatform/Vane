@@ -10,7 +10,13 @@ import { File } from 'lucide-react';
 import { Fragment, useState } from 'react';
 import { Chunk } from '@/lib/types';
 
-const MessageSources = ({ sources }: { sources: Chunk[] }) => {
+const MessageSources = ({
+  sources,
+  onOpenFile,
+}: {
+  sources: Chunk[];
+  onOpenFile: (url: string) => void;
+}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const closeModal = () => {
@@ -31,6 +37,12 @@ const MessageSources = ({ sources }: { sources: Chunk[] }) => {
           key={i}
           href={source.metadata.url}
           target="_blank"
+          onClick={(event) => {
+            if (source.metadata.url.startsWith('file_id://')) {
+              event.preventDefault();
+              onOpenFile(source.metadata.url);
+            }
+          }}
         >
           <p className="dark:text-white text-xs overflow-hidden whitespace-nowrap text-ellipsis">
             {source.metadata.title}
@@ -70,7 +82,7 @@ const MessageSources = ({ sources }: { sources: Chunk[] }) => {
         >
           <div className="flex flex-row items-center space-x-1">
             {sources.slice(3, 6).map((source, i) => {
-              return source.metadata.url === 'File' ? (
+              return source.metadata.url.startsWith('file_id://') ? (
                 <div
                   key={i}
                   className="bg-dark-200 hover:bg-dark-100 transition duration-200 flex items-center justify-center w-6 h-6 rounded-full"
@@ -118,13 +130,20 @@ const MessageSources = ({ sources }: { sources: Chunk[] }) => {
                         key={i}
                         href={source.metadata.url}
                         target="_blank"
+                        onClick={(event) => {
+                          if (source.metadata.url.startsWith('file_id://')) {
+                            event.preventDefault();
+                            closeModal();
+                            onOpenFile(source.metadata.url);
+                          }
+                        }}
                       >
                         <p className="dark:text-white text-xs overflow-hidden whitespace-nowrap text-ellipsis">
                           {source.metadata.title}
                         </p>
                         <div className="flex flex-row items-center justify-between">
                           <div className="flex flex-row items-center space-x-1">
-                            {source.metadata.url === 'File' ? (
+                            {source.metadata.url.startsWith('file_id://') ? (
                               <div className="bg-dark-200 hover:bg-dark-100 transition duration-200 flex items-center justify-center w-6 h-6 rounded-full">
                                 <File size={12} className="text-white/70" />
                               </div>

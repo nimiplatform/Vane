@@ -311,7 +311,7 @@ const Weather = ({
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             <img
-              src={`/weather-ico/${weatherInfo.icon}`}
+              src={`${import.meta.env.BASE_URL}weather-ico/${weatherInfo.icon}`}
               alt={weatherInfo.description}
               className="w-16 h-16 drop-shadow-lg"
             />
@@ -354,7 +354,7 @@ const Weather = ({
             >
               <p className="text-xs font-medium mb-1">{day.day}</p>
               <img
-                src={`/weather-ico/${day.icon}`}
+                src={`${import.meta.env.BASE_URL}weather-ico/${day.icon}`}
                 alt=""
                 className="w-8 h-8 mb-1"
               />

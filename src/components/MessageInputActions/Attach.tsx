@@ -1,3 +1,4 @@
+import { vane } from '@/nimi/client';
 import { cn } from '@/lib/utils';
 import {
   Popover,
@@ -17,14 +18,14 @@ import {
 import { Fragment, useRef, useState } from 'react';
 import { useChat } from '@/lib/hooks/useChat';
 import { AnimatePresence } from 'motion/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { toast } from 'sonner';
 
 const Attach = () => {
   const { files, setFiles, setFileIds, fileIds } = useChat();
 
   const [loading, setLoading] = useState(false);
-  const fileInputRef = useRef<any>();
+  const fileInputRef = useRef<any>(null);
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -36,38 +37,7 @@ const Attach = () => {
     setLoading(true);
 
     try {
-      const data = new FormData();
-
-      for (let i = 0; i < selectedFiles.length; i++) {
-        data.append('files', selectedFiles[i]);
-      }
-
-      const embeddingModelProvider = localStorage.getItem(
-        'embeddingModelProviderId',
-      );
-      const embeddingModel = localStorage.getItem('embeddingModelKey');
-
-      if (!embeddingModelProvider || !embeddingModel) {
-        throw new Error('Please select an embedding model before uploading.');
-      }
-
-      data.append('embedding_model_provider_id', embeddingModelProvider);
-      data.append('embedding_model_key', embeddingModel);
-
-      const res = await fetch(`/api/uploads`, {
-        method: 'POST',
-        body: data,
-      });
-
-      const resData = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        throw new Error(resData.message || 'Failed to upload file(s).');
-      }
-
-      if (!Array.isArray(resData.files)) {
-        throw new Error('Invalid upload response from server.');
-      }
+      const resData = { files: await vane.upload(Array.from(selectedFiles)) };
 
       setFiles([...files, ...resData.files]);
       setFileIds([

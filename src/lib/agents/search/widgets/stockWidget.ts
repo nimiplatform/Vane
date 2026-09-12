@@ -159,6 +159,7 @@ const stockWidget: Widget = {
               if (compFindings.quotes.length === 0) return null;
 
               const compTicker = compFindings.quotes[0].symbol as string;
+              if (compTicker === ticker) return null;
               const compQuote = await yf.quote(compTicker);
               const compCharts = await Promise.all([
                 yf

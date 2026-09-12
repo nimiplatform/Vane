@@ -1,6 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "@nimiplatform/kit/ui/styles.css";
+@import "@nimiplatform/kit/ui/themes/light.css";
+@import "@nimiplatform/kit/ui/themes/nimi-accent.css";
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+@source "../../node_modules/@nimiplatform/kit/dist/**/*.{js,mjs}";
+@source "../**/*.{ts,tsx}";
+
+html, body, #root { min-height: 100%; margin: 0; }
+body { background: #fff; }
+html.dark body { background: #0d1117; }
 
 @font-face {
   font-family: 'PP Editorial';

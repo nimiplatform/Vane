@@ -3,6 +3,7 @@ import { ResearchAction } from '../../types';
 import { Chunk, ReadingResearchBlock } from '@/lib/types';
 import Scraper from '@/lib/scraper';
 import { splitText } from '@/lib/utils/splitText';
+import { settleTasks } from '@/lib/utils/settleTasks';
 
 const extractorPrompt = `
                   Assistant is an AI information extractor. Assistant will be shared with scraped information from a website along with the queries used to retrieve that information. Assistant's task is to extract relevant facts from the scraped data to answer the queries.
@@ -74,92 +75,84 @@ const scrapeURLAction: ResearchAction<typeof schema> = {
       additionalConfig.researchBlockId,
     );
 
-    const results: Chunk[] = [];
-
-    await Promise.all(
+    const results: Chunk[] = await settleTasks(
       params.urls.map(async (url) => {
-        try {
-          const scraped = await Scraper.scrape(url);
+        const scraped = await Scraper.scrape(url);
 
-          if (
-            !readingEmitted &&
-            researchBlock &&
-            researchBlock.type === 'research'
-          ) {
-            readingEmitted = true;
-            researchBlock.data.subSteps.push({
-              id: readingBlockId,
-              type: 'reading',
-              reading: [
-                {
-                  content: '',
-                  metadata: {
-                    url,
-                    title: scraped.title,
-                  },
+        if (
+          !readingEmitted &&
+          researchBlock &&
+          researchBlock.type === 'research'
+        ) {
+          readingEmitted = true;
+          researchBlock.data.subSteps.push({
+            id: readingBlockId,
+            type: 'reading',
+            reading: [
+              {
+                content: '',
+                metadata: {
+                  url,
+                  title: scraped.title,
                 },
-              ],
-            });
-
-            additionalConfig.session.updateBlock(
-              additionalConfig.researchBlockId,
-              [
-                {
-                  op: 'replace',
-                  path: '/data/subSteps',
-                  value: researchBlock.data.subSteps,
-                },
-              ],
-            );
-          } else if (
-            readingEmitted &&
-            researchBlock &&
-            researchBlock.type === 'research'
-          ) {
-            const subStepIndex = researchBlock.data.subSteps.findIndex(
-              (step: any) => step.id === readingBlockId,
-            );
-
-            const subStep = researchBlock.data.subSteps[
-              subStepIndex
-            ] as ReadingResearchBlock;
-
-            subStep.reading.push({
-              content: '',
-              metadata: {
-                url,
-                title: scraped.title,
               },
-            });
+            ],
+          });
 
-            additionalConfig.session.updateBlock(
-              additionalConfig.researchBlockId,
-              [
-                {
-                  op: 'replace',
-                  path: '/data/subSteps',
-                  value: researchBlock.data.subSteps,
-                },
-              ],
-            );
-          }
+          additionalConfig.session.updateBlock(
+            additionalConfig.researchBlockId,
+            [
+              {
+                op: 'replace',
+                path: '/data/subSteps',
+                value: researchBlock.data.subSteps,
+              },
+            ],
+          );
+        } else if (
+          readingEmitted &&
+          researchBlock &&
+          researchBlock.type === 'research'
+        ) {
+          const subStepIndex = researchBlock.data.subSteps.findIndex(
+            (step: any) => step.id === readingBlockId,
+          );
 
-          const chunks = splitText(scraped.content, 4000, 500);
+          const subStep = researchBlock.data.subSteps[
+            subStepIndex
+          ] as ReadingResearchBlock;
 
-          let accumulatedContent = '';
+          subStep.reading.push({
+            content: '',
+            metadata: {
+              url,
+              title: scraped.title,
+            },
+          });
 
-          if (chunks.length > 1) {
-            try {
-              await Promise.all(
+          additionalConfig.session.updateBlock(
+            additionalConfig.researchBlockId,
+            [
+              {
+                op: 'replace',
+                path: '/data/subSteps',
+                value: researchBlock.data.subSteps,
+              },
+            ],
+          );
+        }
+
+        const chunks = splitText(scraped.content, 4000, 500);
+
+        const facts =
+          chunks.length > 1
+            ? await settleTasks(
                 chunks.map(async (chunk) => {
                   const extracted = await additionalConfig.llm.generateObject<
                     typeof extractorSchema
                   >({
                     messages: [
-                      {
-                        role: 'system',
-                        content: extractorPrompt,
-                      },
+                      { role: 'system', content: extractorPrompt },
                       {
                         role: 'user',
                         content: `<queries>Summarize</queries>\n<scraped_data>${chunk}</scraped_data>`,
@@ -167,37 +160,14 @@ const scrapeURLAction: ResearchAction<typeof schema> = {
                     ],
                     schema: extractorSchema,
                   });
-
-                  accumulatedContent += extracted.extracted_facts + '\n';
+                  return extracted.extracted_facts;
                 }),
-              );
-            } catch (err) {
-              console.log(
-                'Error during extraction, falling back to raw content',
-                err,
-              );
-              accumulatedContent = chunks[0];
-            }
-          } else {
-            accumulatedContent = scraped.content;
-          }
-
-          results.push({
-            content: accumulatedContent,
-            metadata: {
-              url,
-              title: scraped.title,
-            },
-          });
-        } catch (error) {
-          results.push({
-            content: `Failed to fetch content from ${url}: ${error}`,
-            metadata: {
-              url,
-              title: `Error scraping ${url}`,
-            },
-          });
-        }
+              )
+            : [scraped.content];
+        return {
+          content: facts.join('\n'),
+          metadata: { url, title: scraped.title },
+        };
       }),
     );
 

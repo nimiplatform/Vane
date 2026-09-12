@@ -1,18 +1,14 @@
+import { vane } from '@/nimi/client';
+import { toast } from 'sonner';
 'use client';
 
 import DeleteChat from '@/components/DeleteChat';
 import { formatTimeDifference } from '@/lib/utils';
 import { BookOpenText, ClockIcon, FileText, Globe2Icon } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
-export interface Chat {
-  id: string;
-  title: string;
-  createdAt: string;
-  sources: string[];
-  files: { fileId: string; name: string }[];
-}
+export type Chat = import('@/nimi/contracts').ChatRecord;
 
 const Page = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -22,16 +18,8 @@ const Page = () => {
     const fetchChats = async () => {
       setLoading(true);
 
-      const res = await fetch(`/api/chats`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await res.json();
-
-      setChats(data.chats);
+      try { setChats(await vane.chats.list()); }
+      catch (error) { toast.error(error instanceof Error ? error.message : String(error)); }
       setLoading(false);
     };
 
@@ -96,7 +84,7 @@ const Page = () => {
             No chats found.
           </p>
           <p className="mt-1 text-black/70 dark:text-white/70 text-sm">
-            <Link href="/" className="text-sky-400">
+            <Link to="/" className="text-sky-400">
               Start a new chat
             </Link>{' '}
             to see it listed here.
@@ -130,7 +118,7 @@ const Page = () => {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <Link
-                      href={`/c/${chat.id}`}
+                      to={`/c/${chat.id}`}
                       className="flex-1 text-black dark:text-white text-base lg:text-lg font-medium leading-snug line-clamp-2 group-hover:text-[#24A0ED] transition duration-200"
                       title={chat.title}
                     >

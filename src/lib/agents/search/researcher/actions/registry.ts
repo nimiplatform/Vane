@@ -1,5 +1,6 @@
-import { Tool, ToolCall } from '@/lib/models/types';
-import {
+import type { Tool, ToolCall } from '@/lib/models/types';
+import { settleTasks } from '@/lib/utils/settleTasks';
+import type {
   ActionOutput,
   AdditionalConfig,
   ClassifierOutput,
@@ -76,7 +77,7 @@ class ActionRegistry {
       throw new Error(`Action with name ${name} not found`);
     }
 
-    return action.execute(params, additionalConfig);
+    return action.execute(action.schema.parse(params), additionalConfig);
   }
 
   static async executeAll(
@@ -87,20 +88,22 @@ class ActionRegistry {
       mode: SearchAgentConfig['mode'];
     },
   ): Promise<ActionOutput[]> {
-    const results: ActionOutput[] = [];
-
-    await Promise.all(
-      actions.map(async (actionConfig) => {
-        const output = await this.execute(
+    // Validate the whole fixed batch before dispatch, and settle every started
+    // handler before reporting failure or honoring a same-batch done action.
+    for (const call of actions) {
+      const action = this.actions.get(call.name);
+      if (!action) throw new Error(`Action with name ${call.name} not found`);
+      action.schema.parse(call.arguments);
+    }
+    return settleTasks(
+      actions.map((actionConfig) =>
+        this.execute(
           actionConfig.name,
           actionConfig.arguments,
           additionalConfig,
-        );
-        results.push(output);
-      }),
+        ),
+      ),
     );
-
-    return results;
   }
 }
 

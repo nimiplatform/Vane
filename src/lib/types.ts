@@ -1,4 +1,4 @@
-import { ToolCall } from './models/types';
+import type { NimiTextTurnItem } from '@nimiplatform/sdk/contracts';
 
 export type SystemMessage = {
   role: 'system';
@@ -8,7 +8,7 @@ export type SystemMessage = {
 export type AssistantMessage = {
   role: 'assistant';
   content: string;
-  tool_calls?: ToolCall[];
+  turnItems?: NimiTextTurnItem[];
 };
 
 export type UserMessage = {

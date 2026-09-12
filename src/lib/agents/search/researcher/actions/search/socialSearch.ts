@@ -44,11 +44,12 @@ const socialSearchAction: ResearchAction<typeof schema> = {
       llm: additionalConfig.llm,
       embedding: additionalConfig.embedding,
       mode: additionalConfig.mode,
-      queries: input.queries,
+      queries: input.queries.map((query) => `site:reddit.com ${query}`),
       researchBlock: researchBlock,
       session: additionalConfig.session,
-      searchConfig: {
-        engines: ['reddit'],
+      acceptResult: ({ url }) => {
+        const hostname = new URL(url).hostname;
+        return hostname === 'reddit.com' || hostname.endsWith('.reddit.com');
       },
     });
 

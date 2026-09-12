@@ -17,7 +17,35 @@ export const splitText = (
   maxTokens = 512,
   overlapTokens = 64,
 ): string[] => {
-  const segments = text.split(splitRegex).filter(Boolean);
+  const segments = text
+    .split(splitRegex)
+    .filter(Boolean)
+    .flatMap((segment) => {
+      if (segment.length <= maxTokens && getTokenCount(segment) <= maxTokens)
+        return [segment];
+      // A paragraph can be longer than the chunk budget. Split it first so the
+      // packing loop always advances, keeping complete Unicode characters.
+      const characters = Array.from(segment);
+      const pieces: string[] = [];
+      let start = 0;
+      while (start < characters.length) {
+        let low = start + 1;
+        let high = Math.min(characters.length, start + maxTokens);
+        let end = low;
+        while (low <= high) {
+          const middle = Math.floor((low + high) / 2);
+          if (
+            getTokenCount(characters.slice(start, middle).join('')) <= maxTokens
+          ) {
+            end = middle;
+            low = middle + 1;
+          } else high = middle - 1;
+        }
+        pieces.push(characters.slice(start, end).join(''));
+        start = end;
+      }
+      return pieces;
+    });
 
   if (segments.length === 0) {
     return [];
@@ -34,7 +62,10 @@ export const splitText = (
     let currentTokenCount = 0;
 
     while (chunkEnd < segments.length && currentTokenCount < maxTokens) {
-      if (currentTokenCount + segmentTokenCounts[chunkEnd] > maxTokens) {
+      if (
+        chunkEnd > chunkStart &&
+        currentTokenCount + segmentTokenCounts[chunkEnd] > maxTokens
+      ) {
         break;
       }
 

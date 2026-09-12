@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Settings } from 'lucide-react';
 import EmptyChatMessageInput from './EmptyChatMessageInput';
 import { File } from './ChatWindow';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import WeatherWidget from './WeatherWidget';
 import NewsArticleWidget from './NewsArticleWidget';
 import SettingsButtonMobile from '@/components/Settings/SettingsButtonMobile';

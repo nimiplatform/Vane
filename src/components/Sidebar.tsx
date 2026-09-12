@@ -10,8 +10,8 @@ import {
   Plus,
   ArrowLeft,
 } from 'lucide-react';
-import Link from 'next/link';
-import { useSelectedLayoutSegments } from 'next/navigation';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import React, { useState, type ReactNode } from 'react';
 import Layout from './Layout';
 import {
@@ -27,7 +27,7 @@ const VerticalIconContainer = ({ children }: { children: ReactNode }) => {
 };
 
 const Sidebar = ({ children }: { children: React.ReactNode }) => {
-  const segments = useSelectedLayoutSegments();
+  const segments = useLocation().pathname.split('/').filter(Boolean);
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
   const navLinks = [
@@ -57,7 +57,7 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
         <div className="flex grow flex-col items-center justify-between gap-y-5 overflow-y-auto bg-light-secondary dark:bg-dark-secondary px-2 py-8 shadow-sm shadow-light-200/10 dark:shadow-black/25">
           <a
             className="p-2.5 rounded-full bg-light-200 text-black/70 dark:bg-dark-200 dark:text-white/70 hover:opacity-70 hover:scale-105 tansition duration-200"
-            href="/"
+            href="#/"
           >
             <Plus size={19} className="cursor-pointer" />
           </a>
@@ -65,7 +65,7 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
             {navLinks.map((link, i) => (
               <Link
                 key={i}
-                href={link.href}
+                to={link.href}
                 className={cn(
                   'relative flex flex-col items-center justify-center space-y-0.5 cursor-pointer w-full py-2 rounded-lg',
                   link.active
@@ -108,7 +108,7 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
       <div className="fixed bottom-0 w-full z-50 flex flex-row items-center gap-x-6 bg-light-secondary dark:bg-dark-secondary px-4 py-4 shadow-sm lg:hidden">
         {navLinks.map((link, i) => (
           <Link
-            href={link.href}
+            to={link.href}
             key={i}
             className={cn(
               'relative flex flex-col items-center space-y-1 text-center w-full',

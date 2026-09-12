@@ -5,6 +5,8 @@ import SessionManager from '@/lib/session';
 import { Message, ReasoningResearchBlock } from '@/lib/types';
 import formatChatHistoryAsString from '@/lib/utils/formatHistory';
 import { ToolCall } from '@/lib/models/types';
+import type { NimiTextOutputItem } from '@nimiplatform/sdk/contracts';
+import UploadStore from '@/lib/uploads/store';
 
 class Researcher {
   async research(
@@ -35,6 +37,8 @@ class Researcher {
       });
 
     const researchBlockId = crypto.randomUUID();
+    const fileDescriptions = await UploadStore.getFileData(input.config.fileIds);
+    let completion: 'done' | 'budget' = 'budget';
 
     session.emitBlock({
       id: researchBlockId,
@@ -62,7 +66,7 @@ class Researcher {
         input.config.mode,
         i,
         maxIteration,
-        input.config.fileIds,
+        fileDescriptions,
       );
 
       const actionStream = input.config.llm.streamText({
@@ -82,8 +86,10 @@ class Researcher {
       let reasoningId = crypto.randomUUID();
 
       let finalToolCalls: ToolCall[] = [];
+      let finalOutput: NimiTextOutputItem[] | undefined;
 
       for await (const partialRes of actionStream) {
+        if (partialRes.done) finalOutput = partialRes.additionalInfo?.outputItems;
         if (partialRes.toolCallChunk.length > 0) {
           partialRes.toolCallChunk.forEach((tc) => {
             if (
@@ -148,17 +154,14 @@ class Researcher {
       }
 
       if (finalToolCalls.length === 0) {
-        break;
+        throw new Error('Research model completed without a declared action.');
       }
-
-      if (finalToolCalls[finalToolCalls.length - 1].name === 'done') {
-        break;
-      }
+      if (!finalOutput) throw new Error('Research model step did not finish.');
 
       agentMessageHistory.push({
         role: 'assistant',
         content: '',
-        tool_calls: finalToolCalls,
+        turnItems: finalOutput.map((output) => ({ type: 'output', output })),
       });
 
       const actionResults = await ActionRegistry.executeAll(finalToolCalls, {
@@ -180,8 +183,13 @@ class Researcher {
           content: JSON.stringify(action),
         });
       });
+      if (finalToolCalls.some((call) => call.name === 'done')) {
+        completion = 'done';
+        break;
+      }
     }
 
+    session.emit('data', { type: 'researchComplete', reason: completion });
     const searchResults = actionOutput
       .filter((a) => a.type === 'search_results')
       .flatMap((a) => a.results);

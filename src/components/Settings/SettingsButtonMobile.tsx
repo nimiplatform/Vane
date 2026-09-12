@@ -1,21 +1,5 @@
 import { Settings } from 'lucide-react';
-import { useState } from 'react';
-import SettingsDialogue from './SettingsDialogue';
-import { AnimatePresence } from 'framer-motion';
-
-const SettingsButtonMobile = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  return (
-    <>
-      <button className="lg:hidden" onClick={() => setIsOpen(true)}>
-        <Settings size={18} />
-      </button>
-      <AnimatePresence>
-        {isOpen && <SettingsDialogue isOpen={isOpen} setIsOpen={setIsOpen} />}
-      </AnimatePresence>
-    </>
-  );
-};
-
-export default SettingsButtonMobile;
+import { Link } from 'react-router-dom';
+export default function SettingsButtonMobile() {
+  return <Link to="/settings" aria-label="Settings" className="p-2 text-black/60 dark:text-white/60"><Settings size={20} /></Link>;
+}

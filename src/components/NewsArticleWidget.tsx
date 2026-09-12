@@ -1,3 +1,4 @@
+import { vane } from '@/nimi/client';
 import { useEffect, useState } from 'react';
 
 interface Article {
@@ -13,11 +14,14 @@ const NewsArticleWidget = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch('/api/discover?mode=preview')
-      .then((res) => res.json())
+    vane
+      .discover('tech', true)
+      .then((blogs) => ({ blogs }))
       .then((data) => {
-        const articles = (data.blogs || []).filter((a: Article) => a.thumbnail);
-        setArticle(articles[Math.floor(Math.random() * articles.length)]);
+        const articles = data.blogs;
+        setArticle(
+          articles[Math.floor(Math.random() * articles.length)] ?? null,
+        );
         setLoading(false);
       })
       .catch(() => {
@@ -40,20 +44,18 @@ const NewsArticleWidget = () => {
         <div className="w-full text-xs text-red-400">Could not load news.</div>
       ) : article ? (
         <a
-          href={`/?q=Summary: ${article.url}`}
+          href={`#/?q=${encodeURIComponent(`Summary: ${article.url}`)}`}
           className="flex flex-row items-stretch w-full h-full relative overflow-hidden group"
         >
-          <div className="relative w-24 min-w-24 max-w-24 h-full overflow-hidden">
-            <img
-              className="object-cover w-full h-full bg-light-200 dark:bg-dark-200 group-hover:scale-110 transition-transform duration-300"
-              src={
-                new URL(article.thumbnail).origin +
-                new URL(article.thumbnail).pathname +
-                `?id=${new URL(article.thumbnail).searchParams.get('id')}`
-              }
-              alt={article.title}
-            />
-          </div>
+          {article.thumbnail && (
+            <div className="relative w-24 min-w-24 max-w-24 h-full overflow-hidden">
+              <img
+                className="object-cover w-full h-full bg-light-200 dark:bg-dark-200 group-hover:scale-110 transition-transform duration-300"
+                src={article.thumbnail}
+                alt={article.title}
+              />
+            </div>
+          )}
           <div className="flex flex-col justify-center flex-1 px-3 py-2">
             <div className="font-semibold text-xs text-black dark:text-white leading-tight line-clamp-2 mb-1">
               {article.title}
@@ -63,7 +65,11 @@ const NewsArticleWidget = () => {
             </p>
           </div>
         </a>
-      ) : null}
+      ) : (
+        <p className="p-3 text-xs">
+          No news found. Try another topic in Discover.
+        </p>
+      )}
     </div>
   );
 };

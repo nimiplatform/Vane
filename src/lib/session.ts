@@ -1,104 +1,117 @@
-import { EventEmitter } from 'stream';
 import { applyPatch } from 'rfc6902';
-import { Block } from './types';
+import type { Block } from './types';
+import type { ResearchUpdate, ResearchStatus } from '../nimi/contracts';
 
-const sessions =
-  (global as any)._sessionManagerSessions || new Map<string, SessionManager>();
-if (process.env.NODE_ENV !== 'production') {
-  (global as any)._sessionManagerSessions = sessions;
-}
+type Listener = (event: string, data: any) => void;
+const sessions = new Map<string, SessionManager>();
 
 class SessionManager {
-  private static sessions: Map<string, SessionManager> = sessions;
   readonly id: string;
   private blocks = new Map<string, Block>();
-  private events: { event: string; data: any }[] = [];
-  private emitter = new EventEmitter();
-  private TTL_MS = 30 * 60 * 1000;
+  private listeners = new Set<Listener>();
+  private researchComplete?: Extract<
+    ResearchUpdate,
+    { type: 'researchComplete' }
+  >;
+  private terminal?: ResearchUpdate;
+  private expiry?: ReturnType<typeof setTimeout>;
 
-  constructor(id?: string) {
-    this.id = id ?? crypto.randomUUID();
-
-    setTimeout(() => {
-      SessionManager.sessions.delete(this.id);
-    }, this.TTL_MS);
+  constructor(
+    id: string = crypto.randomUUID(),
+    readonly signal: AbortSignal,
+  ) {
+    this.id = id;
   }
 
-  static getSession(id: string): SessionManager | undefined {
-    return this.sessions.get(id);
+  static getSession(id: string) {
+    return sessions.get(id);
   }
-
-  static getAllSessions(): SessionManager[] {
-    return Array.from(this.sessions.values());
+  static getAllSessions() {
+    return [...sessions.values()];
   }
-
-  static createSession(): SessionManager {
-    const session = new SessionManager();
-    this.sessions.set(session.id, session);
+  static createSession(id: string, signal: AbortSignal) {
+    if (sessions.has(id)) throw new Error('This research run already exists.');
+    const session = new SessionManager(id, signal);
+    sessions.set(id, session);
     return session;
   }
-
+  static clear() {
+    for (const session of sessions.values()) {
+      session.removeAllListeners();
+      clearTimeout(session.expiry);
+    }
+    sessions.clear();
+  }
   removeAllListeners() {
-    this.emitter.removeAllListeners();
+    this.listeners.clear();
   }
 
   emit(event: string, data: any) {
-    this.emitter.emit(event, data);
-    this.events.push({ event, data });
+    this.assertActive();
+    if (event === 'data' && data.type === 'researchComplete')
+      this.researchComplete = structuredClone(data);
+    this.notify(event, data);
+  }
+
+  private assertActive() {
+    this.signal.throwIfAborted();
+    if (this.terminal) throw new Error('Research is already finished.');
+  }
+
+  private notify(event: string, data: any) {
+    for (const listener of this.listeners) {
+      try {
+        listener(event, data);
+      } catch {
+        this.listeners.delete(listener);
+      }
+    }
+  }
+
+  finish(status: Exclude<ResearchStatus, 'answering'>, message?: string) {
+    if (this.terminal) return;
+    this.terminal =
+      status === 'completed'
+        ? { type: 'messageEnd' }
+        : { type: 'error', status, data: message ?? 'Research stopped.' };
+    this.notify('data', this.terminal);
+    this.listeners.clear();
+    this.expiry = setTimeout(() => sessions.delete(this.id), 30 * 60 * 1000);
+    this.expiry.unref?.();
   }
 
   emitBlock(block: Block) {
+    this.assertActive();
     this.blocks.set(block.id, block);
-    this.emit('data', {
-      type: 'block',
-      block: block,
-    });
+    this.emit('data', { type: 'block', block });
   }
-
-  getBlock(blockId: string): Block | undefined {
+  getBlock(blockId: string) {
     return this.blocks.get(blockId);
   }
-
   updateBlock(blockId: string, patch: any[]) {
+    this.assertActive();
     const block = this.blocks.get(blockId);
-
-    if (block) {
-      applyPatch(block, patch);
-      this.blocks.set(blockId, block);
-      this.emit('data', {
-        type: 'updateBlock',
-        blockId: blockId,
-        patch: patch,
-      });
-    }
+    if (!block) throw new Error('Research block does not exist.');
+    const errors = applyPatch(block, patch);
+    if (errors.some(Boolean))
+      throw new Error('Research block update is invalid.');
+    this.emit('data', { type: 'updateBlock', blockId, patch });
   }
-
   getAllBlocks() {
-    return Array.from(this.blocks.values());
+    return structuredClone([...this.blocks.values()]);
   }
 
-  subscribe(listener: (event: string, data: any) => void): () => void {
-    const currentEventsLength = this.events.length;
-
-    const handler = (event: string) => (data: any) => listener(event, data);
-    const dataHandler = handler('data');
-    const endHandler = handler('end');
-    const errorHandler = handler('error');
-
-    this.emitter.on('data', dataHandler);
-    this.emitter.on('end', endHandler);
-    this.emitter.on('error', errorHandler);
-
-    for (let i = 0; i < currentEventsLength; i++) {
-      const { event, data } = this.events[i];
-      listener(event, data);
-    }
-
-    return () => {
-      this.emitter.off('data', dataHandler);
-      this.emitter.off('end', endHandler);
-      this.emitter.off('error', errorHandler);
-    };
+  subscribe(listener: Listener): () => void {
+    // The current block projection is a complete reconnect snapshot. A token
+    // stream transcript is unnecessary and would grow quadratically as blocks
+    // are replaced. No tool execution is repeated by a subscription.
+    for (const block of this.getAllBlocks())
+      listener('data', { type: 'block', block });
+    if (this.researchComplete)
+      listener('data', structuredClone(this.researchComplete));
+    if (this.terminal) listener('data', this.terminal);
+    else this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
   }
 }
 

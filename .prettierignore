@@ -39,3 +39,9 @@ coverage
 
 # Ignore all files in uploads directory
 uploads
+
+# Nimi build and local development output
+dist-electron
+dist-electron-package
+.vite
+.nimi/local

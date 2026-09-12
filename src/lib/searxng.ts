@@ -1,4 +1,5 @@
 import { getSearxngURL } from './config/serverRegistry';
+import { vaneContext } from '../nimi/context';
 
 export interface SearxngSearchOptions {
   categories?: string[];
@@ -22,7 +23,7 @@ export const searchSearxng = async (
   query: string,
   opts?: SearxngSearchOptions,
 ) => {
-  const searxngURL = getSearxngURL();
+  const searxngURL = await getSearxngURL();
 
   const url = new URL(`${searxngURL}/search?format=json`);
   url.searchParams.append('q', query);
@@ -43,7 +44,7 @@ export const searchSearxng = async (
 
   try {
     const res = await fetch(url, {
-      signal: controller.signal,
+      signal: AbortSignal.any([controller.signal, vaneContext().signal]),
     });
 
     if (!res.ok) {
@@ -52,11 +53,16 @@ export const searchSearxng = async (
 
     const data = await res.json();
 
+    if (!Array.isArray(data.results))
+      throw new Error(
+        'The search service did not return SearxNG JSON results.',
+      );
     const results: SearxngSearchResult[] = data.results;
     const suggestions: string[] = data.suggestions;
 
     return { results, suggestions };
   } catch (err: any) {
+    vaneContext().signal.throwIfAborted();
     if (err.name === 'AbortError') {
       throw new Error('SearXNG search timed out');
     }

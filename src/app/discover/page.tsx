@@ -1,4 +1,5 @@
-'use client';
+import { vane } from '@/nimi/client';
+('use client');
 
 import { Globe2Icon } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -40,30 +41,19 @@ const topics: { key: string; display: string }[] = [
 const Page = () => {
   const [discover, setDiscover] = useState<Discover[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [activeTopic, setActiveTopic] = useState<string>(topics[0].key);
 
   const fetchArticles = async (topic: string) => {
     setLoading(true);
+    setError('');
     try {
-      const res = await fetch(`/api/discover?topic=${topic}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message);
-      }
-
-      data.blogs = data.blogs.filter((blog: Discover) => blog.thumbnail);
-
-      setDiscover(data.blogs);
+      const blogs = await vane.discover(topic);
+      setDiscover(blogs);
     } catch (err: any) {
       console.error('Error fetching data:', err.message);
-      toast.error('Error fetching data');
+      setDiscover(null);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -124,6 +114,16 @@ const Page = () => {
                 fill="currentFill"
               />
             </svg>
+          </div>
+        ) : error || !discover?.length ? (
+          <div className="px-4 py-10 text-center text-sm" role="status">
+            <p>{error || 'No articles found for this topic.'}</p>
+            <button
+              className="mt-3 text-sky-500"
+              onClick={() => void fetchArticles(activeTopic)}
+            >
+              Try again
+            </button>
           </div>
         ) : (
           <div className="flex flex-col gap-4 pb-28 pt-5 lg:pb-8 w-full">

@@ -8,17 +8,25 @@ import computeSimilarity from '@/lib/utils/computeSimilarity';
 import z from 'zod';
 import Scraper from '@/lib/scraper';
 import { splitText } from '@/lib/utils/splitText';
+import { settleTasks } from '@/lib/utils/settleTasks';
 
 export const executeSearch = async (input: {
   queries: string[];
   mode: SearchAgentConfig['mode'];
   searchConfig?: SearxngSearchOptions;
+  acceptResult?: (result: { url: string }) => boolean;
   researchBlock: ResearchBlock;
   session: InstanceType<typeof SessionManager>;
   llm: BaseLLM<any>;
   embedding: BaseEmbedding<any>;
 }) => {
   const researchBlock = input.researchBlock;
+  const fetchResults = async (query: string) => {
+    const response = await searchSearxng(query, input.searchConfig);
+    if (input.acceptResult)
+      response.results = response.results.filter(input.acceptResult);
+    return response;
+  };
 
   researchBlock.data.subSteps.push({
     id: crypto.randomUUID(),
@@ -41,52 +49,29 @@ export const executeSearch = async (input: {
     const results: Chunk[] = [];
 
     const search = async (q: string) => {
-      const res = await searchSearxng(q, {
-        ...(input.searchConfig ? input.searchConfig : {}),
-      });
+      const res = await fetchResults(q);
 
-      let resultChunks: Chunk[] = [];
-
-      try {
-        const queryEmbedding = (await input.embedding.embedText([q]))[0];
-
-        resultChunks = (
-          await Promise.all(
-            res.results.map(async (r) => {
-              const content = r.content || r.title;
-              const chunkEmbedding = (
-                await input.embedding.embedText([content])
-              )[0];
-
-              return {
-                content,
-                metadata: {
-                  title: r.title,
-                  url: r.url,
-                  similarity: computeSimilarity(queryEmbedding, chunkEmbedding),
-                  embedding: chunkEmbedding,
-                },
-              };
-            }),
-          )
-        ).filter((c) => c.metadata.similarity > 0.5);
-      } catch (err) {
-        resultChunks = res.results.map((r) => {
-          const content = r.content || r.title;
-
-          return {
-            content,
-            metadata: {
-              title: r.title,
-              url: r.url,
-              similarity: 1,
-              embedding: [],
-            },
-          };
-        });
-      } finally {
-        results.push(...resultChunks);
-      }
+      if (!res.results.length) return;
+      const [queryEmbedding, ...embeddings] = await input.embedding.embedText([
+        q,
+        ...res.results.map((result) => result.content || result.title),
+      ]);
+      const resultChunks: Chunk[] = res.results
+        .map((result, index) => ({
+          content: result.content || result.title,
+          metadata: {
+            title: result.title,
+            url: result.url,
+            similarity: computeSimilarity(queryEmbedding, embeddings[index]),
+            embedding: embeddings[index],
+          },
+        }))
+        .filter((chunk) => chunk.metadata.similarity > 0.5);
+      results.push(...resultChunks);
+      const visibleChunks = resultChunks.map(({ content, metadata }) => ({
+        content,
+        metadata: { title: metadata.title, url: metadata.url },
+      }));
 
       if (!searchResultsEmitted) {
         searchResultsEmitted = true;
@@ -94,7 +79,7 @@ export const executeSearch = async (input: {
         researchBlock.data.subSteps.push({
           id: searchResultsBlockId,
           type: 'search_results',
-          reading: resultChunks,
+          reading: visibleChunks,
         });
 
         input.session.updateBlock(researchBlock.id, [
@@ -113,7 +98,7 @@ export const executeSearch = async (input: {
           subStepIndex
         ] as SearchResultsResearchBlock;
 
-        subStep.reading.push(...resultChunks);
+        subStep.reading.push(...visibleChunks);
 
         input.session.updateBlock(researchBlock.id, [
           {
@@ -125,7 +110,7 @@ export const executeSearch = async (input: {
       }
     };
 
-    await Promise.all(input.queries.map(search));
+    await settleTasks(input.queries.map(search));
 
     results.sort((a, b) => b.metadata.similarity - a.metadata.similarity);
 
@@ -176,9 +161,7 @@ export const executeSearch = async (input: {
     const searchResults: Chunk[] = [];
 
     const search = async (q: string) => {
-      const res = await searchSearxng(q, {
-        ...(input.searchConfig ? input.searchConfig : {}),
-      });
+      const res = await fetchResults(q);
 
       let resultChunks: Chunk[] = [];
 
@@ -190,8 +173,6 @@ export const executeSearch = async (input: {
           metadata: {
             title: r.title,
             url: r.url,
-            similarity: 1,
-            embedding: [],
           },
         };
       });
@@ -235,7 +216,7 @@ export const executeSearch = async (input: {
       }
     };
 
-    await Promise.all(input.queries.map(search));
+    await settleTasks(input.queries.map(search));
 
     const pickerPrompt = `
       Assistant is an AI search result picker. Assistant's task is to pick 2-3 of the most relevant search results based off the query which can be then scraped for information to answer the query.
@@ -362,58 +343,31 @@ export const executeSearch = async (input: {
         ),
     });
 
-    await Promise.all(
-      filteredResults.map(async (result, i) => {
-        try {
-          const scrapedData = await Scraper.scrape(result.metadata.url).catch(
-            (err) => {
-              console.log('Error scraping data from', result.metadata.url, err);
-            },
-          );
-
-          if (!scrapedData) return;
-
-          let accumulatedContent = '';
+    extractedFacts.push(
+      ...(await settleTasks(
+        filteredResults.map(async (result) => {
+          const scrapedData = await Scraper.scrape(result.metadata.url);
           const chunks = splitText(scrapedData.content, 4000, 500);
-
-          await Promise.all(
+          const facts = await settleTasks(
             chunks.map(async (chunk) => {
-              try {
-                const extractorOutput = await input.llm.generateObject<
-                  typeof extractorSchema
-                >({
-                  schema: extractorSchema,
-                  messages: [
-                    {
-                      role: 'system',
-                      content: extractorPrompt,
-                    },
-                    {
-                      role: 'user',
-                      content: `<queries>${input.queries.join(', ')}</queries>\n<scraped_data>${chunk}</scraped_data>`,
-                    },
-                  ],
-                });
-
-                accumulatedContent += extractorOutput.extracted_facts + '\n';
-              } catch (err) {
-                console.log('Error extracting information from chunk', err);
-              }
+              const extracted = await input.llm.generateObject<
+                typeof extractorSchema
+              >({
+                schema: extractorSchema,
+                messages: [
+                  { role: 'system', content: extractorPrompt },
+                  {
+                    role: 'user',
+                    content: `<queries>${input.queries.join(', ')}</queries>\n<scraped_data>${chunk}</scraped_data>`,
+                  },
+                ],
+              });
+              return extracted.extracted_facts;
             }),
           );
-
-          extractedFacts.push({
-            ...result,
-            content: accumulatedContent,
-          });
-        } catch (err) {
-          console.log(
-            'Error scraping or extracting information from',
-            result.metadata.url,
-            err,
-          );
-        }
-      }),
+          return { ...result, content: facts.join('\n') };
+        }),
+      )),
     );
 
     return extractedFacts;
