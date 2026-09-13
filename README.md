@@ -22,9 +22,24 @@ Changing text-generation settings does not require re-uploading documents. If th
 
 ## Development
 
+Upstream is [ItzCrazyKns/Vane](https://github.com/ItzCrazyKns/Vane), with baseline
+`348feca3e378fb4157b217724ed508dc707f853f` before the Nimi adaptation. The downstream
+App mainline is `nimi`, independent of upstream release tags. Select an exact
+upstream revision when updating and review the affected product, dependency,
+license, CI and agent-entry changes together; do not automatically import tags
+or restore retired provider/account paths.
+
 Use Node.js 24 and the pnpm version declared in `package.json`. This branch currently uses local SDK 0.12, Kit 0.8 and App Tools 0.5.2 candidates for integration testing. Keep local dependency overrides in the ignored `pnpm-workspace.yaml`, pointing to locally packed SDK/Kit/native packages and the App Tools checkout before dependency installation. These are development inputs; public dependency installation belongs to the coordinated release.
 
-The project was adopted with `nimi-app sync`. `init` is for new scaffolds created by App Tools and requires their generated intent; do not fabricate scaffold state for this existing fork.
+The current SDK/Kit and macOS development carrier were rebuilt from Nimi main
+`9a60b81cf84d9067c0c5fa87d2e38d81baf5c785`. The native package uses the explicit
+source-local-development profile for this development environment. Match the
+actual artifact contents and profile when replacing candidates; a matching
+version number alone is insufficient. Nimi-coding is pinned to 0.6.3 for the
+current App Tools candidate. These local artifacts do not establish a public
+component release or a production installed-App result.
+
+The project already uses the managed engineering surface and is maintained with `nimi-app sync`. The current App Tools candidate also supports `nimi-app init --adopt` for first-time adoption of an existing project. This fork has no fresh scaffold intent or lock; do not fabricate them.
 
 ```sh
 pnpm install

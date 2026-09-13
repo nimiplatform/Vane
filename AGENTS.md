@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Vane development
+
+- Start with README.md, package.json and the affected Vane entry. The App owns research steps, tool handlers, document retrieval, search services and presentation; SDK/Kit owns the standard Nimi AI/configuration/storage carrier.
+- Preserve ordered tool results, opaque continuity and Runtime embedding-space identity in `src/nimi`; use the existing Host's session invalidation and cancellation path instead of adding an App-owned platform session.
+- This repository is an existing App, with App-owned Host and product code and no fresh scaffold intent/lock. Keep upstream attribution and the documented product scope.
+- When the installed app-tools package includes `skills/nimi-app-lifecycle/SKILL.md`, read that guide directly before initialization and only the relevant scenario. A public release needs the matched published component versions; local platform candidates remain development evidence.
+- Follow the real Desktop-supervised launcher for App interaction. Keep engineering checks, real business journeys, public Release and installed-App acceptance separate; unrun relevant paths remain NOT-VERIFIED.
+
 <!-- nimicoding:managed:agents:start -->
 # Nimi Coding Managed Block
 
