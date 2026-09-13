@@ -29,36 +29,45 @@ upstream revision when updating and review the affected product, dependency,
 license, CI and agent-entry changes together; do not automatically import tags
 or restore retired provider/account paths.
 
-Use Node.js 24 and the pnpm version declared in `package.json`. This branch currently uses local SDK 0.12, Kit 0.8 and App Tools 0.5.2 candidates for integration testing. Keep local dependency overrides in the ignored `pnpm-workspace.yaml`, pointing to locally packed SDK/Kit/native packages and the App Tools checkout before dependency installation. These are development inputs; public dependency installation belongs to the coordinated release.
+Use Node.js 24 and the pnpm version declared in `package.json`. This branch uses
+published SDK 0.12.0, Kit/native 0.8.0 and App Tools 0.5.2, with nimi-coding pinned
+to 0.6.3. The component releases came from Nimi main
+`9c82151fba95f6397e8b068551208487300343bb`. Install from the checked-in public
+lockfile; local tarballs and parent-checkout overrides are not release inputs.
 
-The current SDK/Kit and macOS development carrier were rebuilt from Nimi main
-`9a60b81cf84d9067c0c5fa87d2e38d81baf5c785`. The native package uses the explicit
-source-local-development profile for this development environment. Match the
-actual artifact contents and profile when replacing candidates; a matching
-version number alone is insufficient. Nimi-coding is pinned to 0.6.3 for the
-current App Tools candidate. These local artifacts do not establish a public
-component release or a production installed-App result.
+The public macOS native carrier uses the production Runtime trust profile.
+Platform-source experiments use Nimi's separately documented development
+carrier/profile and remain private validation. A matching version number alone
+does not make the two native profiles interchangeable.
 
-The project already uses the managed engineering surface and is maintained with `nimi-app sync`. The current App Tools candidate also supports `nimi-app init --adopt` for first-time adoption of an existing project. This fork has no fresh scaffold intent or lock; do not fabricate them.
+The project uses the managed engineering surface and is maintained with `nimi-app sync`. App Tools also supports `nimi-app init --adopt` for first-time adoption of an existing project. This fork has no fresh scaffold intent or lock; do not fabricate them.
 
 ```sh
-pnpm install
+pnpm install --frozen-lockfile
+pnpm exec nimi-app check
 pnpm exec nimi-app test
 pnpm run typecheck
 pnpm dev
 ```
 
-`pnpm dev` is the official App Tools entrypoint. Nimi must be running and signed in with developer mode enabled. For Nimi source development, start `pnpm dev:runtime` and `pnpm dev:desktop` from the Nimi repository first. App Tools asks Desktop to supervise the Electron Host and prints its loopback CDP endpoint.
+`pnpm dev` is the official App Tools entrypoint. Run a matching installed Nimi,
+sign in and enable developer mode. App Tools asks Desktop to supervise the
+Electron Host and prints its loopback CDP endpoint. Nimi's source-development
+Runtime is a separate native trust profile; follow the platform's development
+instructions when working on that profile.
 
-A new development registration has its own managed storage identity. To rebuild and reopen the same App data, run `pnpm exec nimi-app dev --list-registrations`, select the existing registration for this project, then use `pnpm dev -- --resume <selector>`. Plain `pnpm dev` creates a new registration. Renderer reload reconnects within the existing Host. Development registration is separate from installed App lifecycle acceptance.
+A new development registration has its own managed storage identity. To rebuild and reopen the same App data, run `pnpm exec nimi-app dev --list-registrations`, select the existing registration for this project, then use `pnpm dev -- --resume <selector>`. Selectors belong to the current Desktop session; list again after restarting Nimi. Plain `pnpm dev` creates a new registration. Renderer reload reconnects within the existing Host. Development registration is separate from installed App lifecycle acceptance.
 
-`pnpm exec nimi-app check` checks the managed authoring contract. It currently rejects local dependency overrides, so a local test run is not a production check pass. Do not publish SDK/Kit merely to make this development check green.
+`pnpm exec nimi-app check` checks the managed authoring contract and public
+dependency lock. Run it after synchronization and dependency changes, and before
+packaging. Verify real App behavior separately through the supervised Host.
 
 The current Runtime development slice supports the admitted Gemma 4 local configurations and an exact Codex Responses adapter for `gpt-5.6-sol`, selected through a Nimi-managed Codex connection. Real Codex development checks have exercised tools, structured replies and document retrieval. The `claude-sonnet-4-6` Anthropic Messages adapter has protocol tests but no live acceptance yet. Other catalog models are not implicitly covered by these adapters; availability also depends on the connected provider account.
 
 ## Build and release
 
-After local integration is stable, update the public component dependencies together, remove local overrides, regenerate the lockfile, then run the managed lifecycle:
+For an App release, keep the public component combination and lockfile aligned,
+then run the managed lifecycle:
 
 ```sh
 pnpm exec nimi-app sync

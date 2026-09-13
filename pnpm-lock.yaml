@@ -4,12 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@nimiplatform/sdk': file:/Users/snwozy/nimi-realm/nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-sdk-0.12.0.tgz
-  '@nimiplatform/kit': file:/Users/snwozy/nimi-realm/nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-kit-0.8.0.tgz
-  '@nimiplatform/kit-protected-local-darwin-arm64': file:/Users/snwozy/nimi-realm/nimi/.nimi/local/vane-packages/codex-options/nimiplatform-kit-protected-local-darwin-arm64-0.8.0.tgz
-  '@nimiplatform/app-tools': link:/Users/snwozy/nimi-realm/nimi/app-tools
-
 importers:
 
   .:
@@ -18,11 +12,11 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       '@nimiplatform/kit':
-        specifier: file:/Users/snwozy/nimi-realm/nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-kit-0.8.0.tgz
-        version: file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-kit-0.8.0.tgz(@types/node@24.13.4)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(electron@42.11.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^0.8.0
+        version: 0.8.0(@types/node@24.13.4)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(electron@42.11.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@nimiplatform/sdk':
-        specifier: file:/Users/snwozy/nimi-realm/nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-sdk-0.12.0.tgz
-        version: file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-sdk-0.12.0.tgz(@grpc/grpc-js@1.14.4)
+        specifier: ^0.12.0
+        version: 0.12.0(@grpc/grpc-js@1.14.4)
       js-tiktoken:
         specifier: ^1.0.21
         version: 1.0.21
@@ -70,8 +64,8 @@ importers:
         specifier: ^12.3.0
         version: 12.9.0(react@19.2.8)
       '@nimiplatform/app-tools':
-        specifier: link:/Users/snwozy/nimi-realm/nimi/app-tools
-        version: link:../../../nimi/app-tools
+        specifier: ^0.5.2
+        version: 0.5.2(vite@7.3.6(@types/node@24.13.4)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.1))
       '@nimiplatform/nimi-coding':
         specifier: 0.6.3
         version: 0.6.3
@@ -958,16 +952,29 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@nimiplatform/kit-protected-local-darwin-arm64@file:../../../nimi/.nimi/local/vane-packages/codex-options/nimiplatform-kit-protected-local-darwin-arm64-0.8.0.tgz':
-    resolution: {integrity: sha512-67LNgsi0eP4IWU1R8Sfc/V8TWvlsg64ovPRS7cmNZ6WuCvw1JH2638TB5h0g9el70kBt/Qe/efZHeYKvu35jWw==, tarball: file:../../../nimi/.nimi/local/vane-packages/codex-options/nimiplatform-kit-protected-local-darwin-arm64-0.8.0.tgz}
-    version: 0.8.0
+  '@nimiplatform/app-tools@0.5.2':
+    resolution: {integrity: sha512-tew2oN1DM6FVHwLolh9QG/rgs6fMNkyd2NISOA7590DW6l2L6QB+99qTDgZq3jw5AR7Dl7hW5s3MppjEDnZKlA==}
+    engines: {node: '>=24.0.0'}
+    hasBin: true
+    peerDependencies:
+      vite: ^7.3.6
+    peerDependenciesMeta:
+      vite:
+        optional: true
+
+  '@nimiplatform/kit-protected-local-darwin-arm64@0.8.0':
+    resolution: {integrity: sha512-641h+PrgzKq42tGkWUmosEwGSPTKhw2R6vY5hSLDNQkTrDL8Z8z1Iu2CDrh2aKuHT8JzyyBf21BfbpLmHcaWTw==}
     engines: {node: '>=22'}
     cpu: [arm64]
     os: [darwin]
 
-  '@nimiplatform/kit@file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-kit-0.8.0.tgz':
-    resolution: {integrity: sha512-Xjk6W33R5sjRBqf7w+YdPQXpist2c1wdsOhqTSfmcEmle0MPTMyjdFeYsDtiq1flW8L+cLoq27syioI9cr2iSQ==, tarball: file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-kit-0.8.0.tgz}
-    version: 0.8.0
+  '@nimiplatform/kit-protected-local-win32-x64@0.8.0':
+    resolution: {integrity: sha512-JwnTtPFDFOiiKRhGiCR4sbzzSru8Q87zJ7FGX+DYRyWgSrP7kJhkGNjkAMJLYSApYk3u/KSAaqBtnuXVK6Za3g==}
+    cpu: [x64]
+    os: [win32]
+
+  '@nimiplatform/kit@0.8.0':
+    resolution: {integrity: sha512-CfDDMj7vhcotZhMVy22r2cDw+EGsyRH17d9qDsx4ugsr99CtUcTBA1d9ppNihksUla2WPcyug9CReM0idq1aTg==}
     peerDependencies:
       electron: ^42.5.0
       react: ^19.0.0
@@ -986,9 +993,8 @@ packages:
     engines: {node: '>=24.0.0', pnpm: '>=10.0.0'}
     hasBin: true
 
-  '@nimiplatform/sdk@file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-sdk-0.12.0.tgz':
-    resolution: {integrity: sha512-ho8Pfq8YlHgwW5gHSc0SbzK6IviOBMlJv1A07v0Vv7/RWlpkZU4gR1KwNNs74B0+2vkOrctKswjBLJNFM2k3kQ==, tarball: file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-sdk-0.12.0.tgz}
-    version: 0.12.0
+  '@nimiplatform/sdk@0.12.0':
+    resolution: {integrity: sha512-P51DB6zt/pE/+xoiAmOH58Tg4yCEQAjxhEmucrBSQcZ/03sC9hdoUb4jukFjS5gV+flzNjJm5HH8KFGI7OhFRQ==}
     peerDependencies:
       '@grpc/grpc-js': ^1.14.4
     peerDependenciesMeta:
@@ -2856,8 +2862,16 @@ packages:
     resolution: {integrity: sha512-ZIfcLJC+7E7FBFnDxm9MPmt7D+DidyQ26lewieO75AdhA2ayMtsJSES0iWzqJQbcVRSrTufQoy0DR94xHue0oA==}
     engines: {node: '>=10.4.0'}
 
+  pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
+
   postcss-selector-parser@6.0.10:
     resolution: {integrity: sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==}
+    engines: {node: '>=4'}
+
+  postcss-selector-parser@7.1.6:
+    resolution: {integrity: sha512-7qASPzhKF2l2KLboRZux8CCTRMdGiV08vWmyKzPz22qZ7ZjQBOeY7rNzNoCLSUiftJ7HUq0GERHmxw/t0dCdMw==}
     engines: {node: '>=4'}
 
   postcss-value-parser@4.2.0:
@@ -4246,13 +4260,27 @@ snapshots:
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true
 
-  '@nimiplatform/kit-protected-local-darwin-arm64@file:../../../nimi/.nimi/local/vane-packages/codex-options/nimiplatform-kit-protected-local-darwin-arm64-0.8.0.tgz':
+  '@nimiplatform/app-tools@0.5.2(vite@7.3.6(@types/node@24.13.4)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.1))':
+    dependencies:
+      pngjs: 7.0.0
+      postcss: 8.5.28
+      postcss-selector-parser: 7.1.6
+      semver: 7.8.5
+      typescript: 5.9.3
+      yaml: 2.9.1
+    optionalDependencies:
+      vite: 7.3.6(@types/node@24.13.4)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.1)
+
+  '@nimiplatform/kit-protected-local-darwin-arm64@0.8.0':
     optional: true
 
-  '@nimiplatform/kit@file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-kit-0.8.0.tgz(@types/node@24.13.4)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(electron@42.11.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@nimiplatform/kit-protected-local-win32-x64@0.8.0':
+    optional: true
+
+  '@nimiplatform/kit@0.8.0(@types/node@24.13.4)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(electron@42.11.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@grpc/grpc-js': 1.14.4
-      '@nimiplatform/sdk': file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-sdk-0.12.0.tgz(@grpc/grpc-js@1.14.4)
+      '@nimiplatform/sdk': 0.12.0(@grpc/grpc-js@1.14.4)
       '@radix-ui/react-avatar': 1.2.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-popover': 1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -4277,7 +4305,8 @@ snapshots:
       wlipsync: 1.3.1
       zod: 4.5.4
     optionalDependencies:
-      '@nimiplatform/kit-protected-local-darwin-arm64': file:../../../nimi/.nimi/local/vane-packages/codex-options/nimiplatform-kit-protected-local-darwin-arm64-0.8.0.tgz
+      '@nimiplatform/kit-protected-local-darwin-arm64': 0.8.0
+      '@nimiplatform/kit-protected-local-win32-x64': 0.8.0
       electron: 42.11.3
       react-dom: 19.2.8(react@19.2.8)
     transitivePeerDependencies:
@@ -4292,7 +4321,7 @@ snapshots:
       typescript: 5.9.3
       yaml: 2.9.1
 
-  '@nimiplatform/sdk@file:../../../nimi/.nimi/local/vane-packages/codex-tools/nimiplatform-sdk-0.12.0.tgz(@grpc/grpc-js@1.14.4)':
+  '@nimiplatform/sdk@0.12.0(@grpc/grpc-js@1.14.4)':
     dependencies:
       '@protobuf-ts/runtime': 2.11.1
     optionalDependencies:
@@ -6275,7 +6304,14 @@ snapshots:
       base64-js: 1.5.1
       xmlbuilder: 15.1.1
 
+  pngjs@7.0.0: {}
+
   postcss-selector-parser@6.0.10:
+    dependencies:
+      cssesc: 3.0.0
+      util-deprecate: 1.0.2
+
+  postcss-selector-parser@7.1.6:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
