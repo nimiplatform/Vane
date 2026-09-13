@@ -78,7 +78,7 @@
     "yet-another-react-lightbox": "^3.17.2",
     "react-router-dom": "^7.9.0",
     "@nimiplatform/app-tools": "^0.5.2",
-    "@nimiplatform/nimi-coding": "0.6.2"
+    "@nimiplatform/nimi-coding": "0.6.3"
   },
   "optionalDependencies": {
     "@napi-rs/canvas": "^0.1.87"
