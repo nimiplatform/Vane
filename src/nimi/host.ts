@@ -60,6 +60,8 @@ const messageText = (message: ResearchMessage) =>
 function researchErrorMessage(error: unknown): string {
   const reasonCode = (error as { reasonCode?: unknown } | null)?.reasonCode;
   switch (reasonCode) {
+    case 'ai-model-not-found':
+      return 'The selected model is unavailable for this Nimi connection. Choose an available model in Settings → AI models and try again.';
     case 'runtime-service-unavailable':
       return 'Nimi is unavailable. Start Nimi, then reopen Vane to try again.';
     case 'runtime-service-error-unclassified':

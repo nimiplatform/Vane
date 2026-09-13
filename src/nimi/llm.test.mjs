@@ -1,6 +1,35 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { NimiEmbedding } from './llm.ts';
+import { NimiEmbedding, NimiLLM } from './llm.ts';
+
+test('the Vane streaming wrapper preserves opaque continuity for the next researcher step', async () => {
+  const inputs = [];
+  const carrier = { kind: 'test.encrypted', version: 1, payload: [0, 255] };
+  const model = new NimiLLM({
+    signal: new AbortController().signal,
+    services: { ai: { text: { async streamTurn(input) {
+      inputs.push(input);
+      return {
+        async *[Symbol.asyncIterator]() {
+          yield { type: 'reasoning-continuity', itemIndex: 0, carrier };
+          yield { type: 'delta', itemIndex: 1, text: 'Answer.' };
+          yield { type: 'completed', finishReason: 'stop' };
+        },
+        async cancel() {},
+      };
+    } } } },
+  });
+  let final;
+  for await (const chunk of model.streamText({ messages: [{ role: 'user', content: 'Answer.' }] })) final = chunk;
+  const items = final.additionalInfo.outputItems;
+  assert.deepEqual(items[0], { type: 'reasoning-continuity', carrier: { ...carrier, payload: new Uint8Array(carrier.payload) } });
+  await model.generateText({ messages: [
+    { role: 'user', content: 'Answer.' },
+    { role: 'assistant', content: 'Answer.', turnItems: items.map((output) => ({ type: 'output', output })) },
+    { role: 'user', content: 'Continue.' },
+  ] });
+  assert.deepEqual(inputs[1].messages[1].turnItems[0], { type: 'output', output: { type: 'reasoning-continuity', carrier } });
+});
 
 test('embedding batches retain the Runtime space without reading unrelated AIConfig revisions', async () => {
   const batches = [];

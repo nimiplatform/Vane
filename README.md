@@ -14,6 +14,8 @@ The release target is installation and launch from Nimi. Once installed, sign in
 
 Settings are entered inside the App. End users do not edit repository files, install Node.js or run a Vane web server. Search queries go to the configured search service; AI execution follows the configuration owned by Nimi.
 
+Search-engine outages are reported with a retry or service-selection action. Quality mode uses deeper research while keeping the answer length appropriate to the question.
+
 Research can be stopped. Reopening a chat within the running Host observes its current progress without repeating tools. After a Host exit, an unfinished saved request is shown as interrupted; it is not automatically resumed.
 
 Changing text-generation settings does not require re-uploading documents. If the embedding model changes, clear the old attachments and upload them again to rebuild their indexes. Interrupted answers remain incomplete; a connection failure never confirms that unsaved progress was stored.
@@ -37,7 +39,7 @@ A new development registration has its own managed storage identity. To rebuild 
 
 `pnpm exec nimi-app check` checks the managed authoring contract. It currently rejects local dependency overrides, so a local test run is not a production check pass. Do not publish SDK/Kit merely to make this development check green.
 
-The current Runtime development slice supports the admitted Gemma 4 local configurations and an exact Anthropic Messages adapter for `claude-sonnet-4-6`. The latter supports text function tools and native JSON Schema through synchronous and streaming calls; its real cloud-provider acceptance is still pending a Nimi-managed Connector. Other cloud models are not implicitly covered by this adapter.
+The current Runtime development slice supports the admitted Gemma 4 local configurations and an exact Codex Responses adapter for `gpt-5.6-sol`, selected through a Nimi-managed Codex connection. Real Codex development checks have exercised tools, structured replies and document retrieval. The `claude-sonnet-4-6` Anthropic Messages adapter has protocol tests but no live acceptance yet. Other catalog models are not implicitly covered by these adapters; availability also depends on the connected provider account.
 
 ## Build and release
 

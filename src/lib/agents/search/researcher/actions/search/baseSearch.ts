@@ -54,7 +54,7 @@ export const executeSearch = async (input: {
       if (!res.results.length) return;
       const [queryEmbedding, ...embeddings] = await input.embedding.embedText([
         q,
-        ...res.results.map((result) => result.content || result.title),
+        ...res.results.map((result) => `${result.title}\n${result.content || ''}`),
       ]);
       const resultChunks: Chunk[] = res.results
         .map((result, index) => ({
@@ -65,8 +65,7 @@ export const executeSearch = async (input: {
             similarity: computeSimilarity(queryEmbedding, embeddings[index]),
             embedding: embeddings[index],
           },
-        }))
-        .filter((chunk) => chunk.metadata.similarity > 0.5);
+        }));
       results.push(...resultChunks);
       const visibleChunks = resultChunks.map(({ content, metadata }) => ({
         content,
@@ -114,44 +113,21 @@ export const executeSearch = async (input: {
 
     results.sort((a, b) => b.metadata.similarity - a.metadata.similarity);
 
-    const uniqueSearchResultIndices: Set<number> = new Set();
-
-    for (let i = 0; i < results.length; i++) {
-      let isDuplicate = false;
-
-      for (const indice of uniqueSearchResultIndices.keys()) {
-        if (
-          results[i].metadata.embedding.length === 0 ||
-          results[indice].metadata.embedding.length === 0
-        )
-          continue;
-
-        const similarity = computeSimilarity(
-          results[i].metadata.embedding,
-          results[indice].metadata.embedding,
-        );
-
-        if (similarity > 0.75) {
-          isDuplicate = true;
-          break;
-        }
-      }
-
-      if (!isDuplicate) {
-        uniqueSearchResultIndices.add(i);
-      }
-    }
-
-    const uniqueSearchResults = Array.from(uniqueSearchResultIndices.keys())
-      .map((i) => {
-        const uniqueResult = results[i];
-
-        delete uniqueResult.metadata.embedding;
-        delete uniqueResult.metadata.similarity;
-
-        return uniqueResult;
+    // Embedding scores rank relevance; they do not establish that two URLs
+    // identify the same paper. A universal cutoff also drops short exact-title
+    // matches when the user selects a different embedding model in Nimi.
+    const seenUrls = new Set<string>();
+    const uniqueSearchResults = results
+      .filter((result) => {
+        if (seenUrls.has(result.metadata.url)) return false;
+        seenUrls.add(result.metadata.url);
+        return true;
       })
-      .slice(0, 20);
+      .slice(0, 20)
+      .map(({ content, metadata }) => ({
+        content,
+        metadata: { title: metadata.title, url: metadata.url },
+      }));
 
     return uniqueSearchResults;
   } else if (input.mode === 'quality') {

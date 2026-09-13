@@ -127,6 +127,8 @@ export class NimiLLM extends BaseLLM<VaneContext> {
           toolCall: event.toolCall,
         });
         yield { contentChunk: '', toolCallChunk: [event.toolCall as ToolCall] };
+      } else if (event.type === 'reasoning-continuity') {
+        outputs.set(event.itemIndex!, { type: 'reasoning-continuity', carrier: event.carrier });
       } else if (event.type === 'done') finishReason = event.finishReason;
     }
     this.config.signal.throwIfAborted();

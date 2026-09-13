@@ -57,6 +57,10 @@ export const searchSearxng = async (
       throw new Error(
         'The search service did not return SearxNG JSON results.',
       );
+    if (data.results.length === 0 && Array.isArray(data.unresponsive_engines) && data.unresponsive_engines.length > 0)
+      throw new Error(
+        'The search service returned no results and reported engine failures. Try again later or choose another SearxNG service in Settings → Search.',
+      );
     const results: SearxngSearchResult[] = data.results;
     const suggestions: string[] = data.suggestions;
 

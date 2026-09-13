@@ -13,6 +13,13 @@ import Discover from './app/discover/page';
 import SettingsPage from './nimi/settings-page';
 import './app/globals.css';
 
+function connectionErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  return message === 'runtime-service-unavailable'
+    ? 'Nimi is unavailable. Open Nimi, then retry the connection.'
+    : message;
+}
+
 function AppGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<'loading' | 'ready' | 'unavailable'>(
     'loading',
@@ -24,13 +31,13 @@ function AppGate({ children }: { children: ReactNode }) {
       const auth = await nimi.auth.status();
       if (!auth.sessionBound)
         throw new Error(
-          `Open Nimi and sign in to use Vane. ${auth.reasonCode}`,
+          'Open Nimi and sign in to use Vane.',
         );
       await vane.ready();
       setClientSettings(await vane.settings.get());
       setState('ready');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
+      setMessage(connectionErrorMessage(error));
       setState('unavailable');
     }
   };
@@ -46,7 +53,7 @@ function AppGate({ children }: { children: ReactNode }) {
           }
         })
         .catch((error) => {
-          setMessage(error instanceof Error ? error.message : String(error));
+          setMessage(connectionErrorMessage(error));
           setState('unavailable');
         });
     };
