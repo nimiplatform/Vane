@@ -1,6 +1,6 @@
 # Vane for Nimi
 
-This fork adapts [Vane](https://github.com/ItzCrazyKns/Vane) into a Nimi ecosystem App. Integration is in progress; the Nimi package has not been published yet. The first target is Apple Silicon macOS.
+This fork adapts [Vane](https://github.com/ItzCrazyKns/Vane) into a Nimi ecosystem App. The standalone Nimi App targets Apple Silicon macOS. Availability in the Nimi catalog requires a separately approved Registry entry.
 
 Vane owns research steps, web tools, document retrieval and answer presentation. Nimi owns account binding, App authorization, model configuration and AI consumption. Chat history, uploaded documents and search settings use Nimi managed App storage.
 
@@ -86,3 +86,7 @@ The former Next.js server, direct model provider setup, SQLite and Docker deploy
 ## License and upstream
 
 Vane is MIT licensed. See [LICENSE](LICENSE). Original project and contributors: [ItzCrazyKns/Vane](https://github.com/ItzCrazyKns/Vane).
+
+## Support
+
+Report the App version, failed operation, Runtime status and error message through this fork’s GitHub issue tracker. Remove credentials, session tokens, document contents and private search queries from reports. Restart Vane from Nimi after checking model and search settings; an interrupted request is not automatically resumed.

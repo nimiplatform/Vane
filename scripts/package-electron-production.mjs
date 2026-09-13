@@ -118,7 +118,7 @@ try {
     // Publisher-side ad-hoc sealing supplies no Developer ID or notarization.
     // Runtime preserves these bytes; Nimi never signs installed third-party code.
     ...(MACOS_BUILD ? { osxSign: {
-      identity: '-', identityValidation: false, preAutoEntitlements: false,
+      identity: '-', identityValidation: false, continueOnError: false, preAutoEntitlements: false,
       preEmbedProvisioningProfile: false, strictVerify: true,
       optionsForFile: () => ({ entitlements: [], hardenedRuntime: false, timestamp: 'none' }),
     } } : {}),
