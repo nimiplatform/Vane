@@ -30,8 +30,8 @@ license, CI and agent-entry changes together; do not automatically import tags
 or restore retired provider/account paths.
 
 Use Node.js 24 and the pnpm version declared in `package.json`. This branch uses
-published SDK 0.12.0, Kit/native 0.8.0 and App Tools 0.5.2, with nimi-coding pinned
-to 0.6.3. The component releases came from Nimi main
+published SDK 0.12.0, Kit/native 0.8.0 and App Tools 0.5.3, with nimi-coding pinned
+to 0.6.3. The SDK and Kit releases came from Nimi main
 `9c82151fba95f6397e8b068551208487300343bb`. Install from the checked-in public
 lockfile; local tarballs and parent-checkout overrides are not release inputs.
 
@@ -65,6 +65,13 @@ packaging. Verify real App behavior separately through the supervised Host.
 The current Runtime development slice supports the admitted Gemma 4 local configurations and an exact Codex Responses adapter for `gpt-5.6-sol`, selected through a Nimi-managed Codex connection. Real Codex development checks have exercised tools, structured replies and document retrieval. The `claude-sonnet-4-6` Anthropic Messages adapter has protocol tests but no live acceptance yet. Other catalog models are not implicitly covered by these adapters; availability also depends on the connected provider account.
 
 ## Build and release
+
+Before the first release, follow the [app-tools publishing setup](https://github.com/nimiplatform/nimi/blob/main/app-tools/README.md#publishing-on-github).
+Configure `NIMI_REPOSITORY_ADMIN_TOKEN` in this repository's Actions secrets with
+**Administration: Read-only**. It only checks tag protection and Release
+immutability; actual Release uploads use GitHub's built-in token. Local
+development does not need this credential. A secret in another App repository
+is not inherited.
 
 For an App release, keep the public component combination and lockfile aligned,
 then run the managed lifecycle:
