@@ -88,6 +88,8 @@ Run the commands above on Apple Silicon macOS. On Windows x64, use `--target win
 
 The `--production` flag supplies the native execution metadata required by Nimi installation; it does not publish anything. For local installation testing, use Nimi → Apps → Add app → Import local package.
 
+The `.gitattributes` rule preserves `LICENSE` bytes on Windows. Registry compares the packaged license with the exact tagged source file; a checkout line-ending conversion also fails this check.
+
 The generated `.github/workflows/nimi-app-release.yml` owns GitHub package publication. Registry admission and installation through Nimi are separate acceptance steps and remain unverified until actually exercised. No test requires publishing a package, pushing a tag or merging a release PR.
 
 The former Next.js server, direct model provider setup, SQLite and Docker deployment are removed from this fork. Upstream documentation under `docs/` describes the original project; it is not the integration contract for this Nimi App.

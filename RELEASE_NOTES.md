@@ -1,3 +1,9 @@
+# Vane for Nimi 0.1.3
+
+Fixes Windows license packaging by preserving the source LF line endings. The immutable 0.1.2 Windows package converted them to CRLF and was rejected by Registry source-license verification; 0.1.2 remains published but is not admitted.
+
+Windows x64 and macOS ARM64 packages retain the same functionality and packaged dependency checks introduced in 0.1.2. Desktop/production Runtime and Catalog lifecycle acceptance remain NOT-VERIFIED.
+
 # Vane for Nimi 0.1.2
 
 Adds a Windows x64 package alongside macOS Apple Silicon. Both targets use the same managed build, package, provenance and immutable Release workflow.

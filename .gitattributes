@@ -1,0 +1,2 @@
+# Registry checks the packaged license against the exact Git source bytes.
+LICENSE text eol=lf
