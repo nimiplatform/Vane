@@ -1,3 +1,11 @@
+# Vane for Nimi 0.1.2
+
+Adds a Windows x64 package alongside macOS Apple Silicon. Both targets use the same managed build, package, provenance and immutable Release workflow.
+
+Packaging now checks the shipped Electron binary, protected native binding, canvas and real PDF/DOCX extraction using the packaged production dependencies. Windows Desktop/Runtime launch, business interaction and Catalog installation/update remain NOT-VERIFIED.
+
+Public SDK 0.12.0, Kit/native 0.8.0 and App Tools 0.5.3 remain unchanged. Windows is unsigned; macOS uses ad-hoc sealing without Developer ID or notarization.
+
 # Vane for Nimi 0.1.1
 
 Initial standalone Nimi App package for macOS Apple Silicon. Catalog admission is a separate administrator decision.

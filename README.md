@@ -1,6 +1,6 @@
 # Vane for Nimi
 
-This fork adapts [Vane](https://github.com/ItzCrazyKns/Vane) into a Nimi ecosystem App. The standalone Nimi App targets Apple Silicon macOS. Availability in the Nimi catalog requires a separately approved Registry entry.
+This fork adapts [Vane](https://github.com/ItzCrazyKns/Vane) into a Nimi ecosystem App. The standalone Nimi App targets Windows x64 and Apple Silicon macOS. Availability in the Nimi catalog requires a separately approved Registry entry.
 
 Vane owns research steps, web tools, document retrieval and answer presentation. Nimi owns account binding, App authorization, model configuration and AI consumption. Chat history, uploaded documents and search settings use Nimi managed App storage.
 
@@ -83,6 +83,8 @@ pnpm exec nimi-app test
 pnpm exec nimi-app build --target macos-aarch64 --production
 pnpm exec nimi-app pack --target macos-aarch64 --production
 ```
+
+Run the commands above on Apple Silicon macOS. On Windows x64, use `--target windows-x86_64` for both build and pack. The managed workflow builds both targets on their native runners and aggregates their packages into one Release. Every build executes the packaged Electron binary to check protected-native loading, canvas and real PDF/DOCX extraction; this dependency check does not establish Desktop/Runtime or GUI acceptance.
 
 The `--production` flag supplies the native execution metadata required by Nimi installation; it does not publish anything. For local installation testing, use Nimi → Apps → Add app → Import local package.
 

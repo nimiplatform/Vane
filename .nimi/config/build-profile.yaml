@@ -12,4 +12,10 @@ targets:
     build_command: pnpm run build:electron:production
     payload_path: dist-electron-package/vane-shell-darwin-arm64
     runtime_entry: payload/vane-shell.app/Contents/MacOS/vane-shell
+  windows-x86_64:
+    os: windows
+    arch: x86_64
+    build_command: pnpm run build:electron:production
+    payload_path: dist-electron-package/vane-shell-win32-x64
+    runtime_entry: payload/vane-shell.exe
 profile_role: developer-workflow-input

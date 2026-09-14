@@ -1,6 +1,6 @@
 {
   "name": "vane",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "author": "ItzCrazyKns",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "vite build",
     "format:write": "prettier . --write",
     "build:electron": "node scripts/build-electron.mjs",
-    "build:electron:production": "node scripts/clean-electron-production.mjs && pnpm run typecheck && pnpm run build && pnpm run build:electron && node scripts/package-electron-production.mjs",
+    "build:electron:production": "node scripts/clean-electron-production.mjs && pnpm run typecheck && pnpm run build && pnpm run build:electron && node scripts/package-electron-production.mjs && node scripts/check-electron-package.cjs",
     "typecheck": "tsc --noEmit",
     "test:app": "tsx --test src/lib/session.test.mjs src/lib/utils/splitText.test.mjs src/lib/agents/search/researcher/actions/registry.test.mjs src/nimi/llm.test.mjs",
     "check": "nimi-app check",
