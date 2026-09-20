@@ -1,6 +1,6 @@
 app_id: nimiplatform.vane
 display_name: Vane
-version: 0.1.3
+version: 0.1.4
 profile: standalone
 manifest_role: submitted-input
 app_access:
@@ -9,6 +9,37 @@ capability_contract_refs:
   - text.generate
   - text.embed
 required_standardized_feature_refs: []
+safety_profile:
+  intended_audience: general
+  content_descriptors:
+    - unmoderated-shared-content
+  ai:
+    direct_interaction: true
+    interaction_notice: absent
+    risk_features: []
+    subject_notice: not-applicable
+    outputs:
+      - modality: text
+        exposure: exportable
+        publication_control: not-applicable
+        in_product_notice: absent
+        export_visible_marking: absent
+        machine_readable_marking: absent
+      - modality: audio
+        exposure: in-app-only
+        publication_control: not-applicable
+        in_product_notice: absent
+        export_visible_marking: not-applicable
+        machine_readable_marking: absent
+  data_practices:
+    publisher_direct_external_network: true
+    telemetry: []
+    third_party_account: none
+    user_content_sharing: none
+    commercial_features: []
+    sensitive_data_categories:
+      - precise-location
+  high_impact_decision_uses: []
 storage_policy:
   kind: nimi-mediated-default
 metadata:

@@ -1,3 +1,7 @@
+# Vane for Nimi 0.1.4
+
+Adds the publisher declaration for audience, web/social research content, AI text and read-aloud output, external search and location use. Keeps the supported SDK 0.12 / Kit 0.8 pairing and existing business behavior. This metadata release adds no launch gate or safety certification. Publication, Registry admission and installed acceptance remain separate steps.
+
 # Vane for Nimi 0.1.3
 
 Fixes Windows license packaging by preserving the source LF line endings. The immutable 0.1.2 Windows package converted them to CRLF and was rejected by Registry source-license verification; 0.1.2 remains published but is not admitted.
