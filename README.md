@@ -113,3 +113,9 @@ Vane is MIT licensed. See [LICENSE](LICENSE). Original project and contributors:
 ## Support
 
 Report the App version, failed operation, Runtime status and error message through this fork’s GitHub issue tracker. Remove credentials, session tokens, document contents and private search queries from reports. Restart Vane from Nimi after checking model and search settings; an interrupted request is not automatically resumed.
+
+## Published Nimi dependency update — 2026-10-12
+
+[0.1.5](https://github.com/nimiplatform/Vane/releases/tag/v0.1.5) is published through the managed immutable-release workflow and [admitted to the Registry](https://github.com/nimiplatform/nimi-app-registry/pull/67). The App consumes released SDK 0.21.0, Kit/native 0.19.0, App Tools 0.12.0 and Nimi Coding 0.6.5 through public npm locks, with no local Nimi dependency override.
+
+Document upload, embedding retrieval, cited answers and saved-result reload passed. Catalog 0.1.5 downloaded, installed and launched; its AI connection returned runtime-service-untrusted in the current source-development Runtime topology. These business checks used the actual Desktop-supervised development Host. Catalog AI acceptance remains NOT-VERIFIED; the user authorized publication and admission with that limitation recorded. Windows package production tests, build and provenance passed; Windows interactive use remains NOT-VERIFIED.
