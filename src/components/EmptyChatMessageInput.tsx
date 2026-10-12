@@ -8,7 +8,7 @@ import { useChat } from '@/lib/hooks/useChat';
 import ModelSelector from './MessageInputActions/ChatModelSelector';
 
 const EmptyChatMessageInput = () => {
-  const { sendMessage } = useChat();
+  const { sendMessage, uploadingFiles } = useChat();
 
   /* const [copilotEnabled, setCopilotEnabled] = useState(false); */
   const [message, setMessage] = useState('');
@@ -43,12 +43,14 @@ const EmptyChatMessageInput = () => {
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (uploadingFiles) return;
         sendMessage(message);
         setMessage('');
       }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
+          if (uploadingFiles) return;
           sendMessage(message);
           setMessage('');
         }
@@ -73,7 +75,7 @@ const EmptyChatMessageInput = () => {
               <Attach />
             </div>
             <button
-              disabled={message.trim().length === 0}
+              disabled={message.trim().length === 0 || uploadingFiles}
               className="bg-sky-500 text-white disabled:text-black/50 dark:disabled:text-white/50 disabled:bg-[#e0e0dc] dark:disabled:bg-[#ececec21] hover:bg-opacity-85 transition duration-100 rounded-full p-2"
             >
               <ArrowRight className="bg-background" size={17} />

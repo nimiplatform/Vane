@@ -1,3 +1,7 @@
+## Windows candidate 0.1.7 — 2026-10-13
+
+Unreleased working tree with published SDK 0.21.0, Kit/native 0.19.3, App Tools 0.12.2 and Nimi Coding 0.6.5. Type checking and 15 tests pass. Desktop-supervised Electron against installed Nimi 0.2.2 uploaded and embedded `windows-acceptance.txt`, returned a cited Chinese answer identifying Lin Lan, Runtime Bridge and six BLUEBIRD-743 observations, and restored that answer after reload. Research uses automatic tool choice with the existing no-action rejection; submission waits for attachment processing. Web search is NOT-VERIFIED because this workspace has no SearxNG service. Candidate installation and Catalog acceptance remain NOT-VERIFIED. Earlier macOS evidence below keeps its original version and scope.
+
 ## Catalog App support for source Runtime — 0.1.6
 
 This release resolves public npm Kit/native **0.19.2** in the frozen lockfile,

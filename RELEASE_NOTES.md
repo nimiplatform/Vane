@@ -1,3 +1,7 @@
+# 0.1.7 — Windows candidate (unreleased)
+
+Uses published SDK 0.21.0, Kit/native 0.19.3 and App Tools 0.12.2. Research uses automatic tool choice while still rejecting a completed step without a declared action. Document processing blocks submission until the attachment is ready, preserving the query and its file context. Windows document indexing, cited Chinese answers and saved-chat reload were exercised through Desktop-supervised Electron against installed Nimi 0.2.2. Catalog installation of this candidate remains NOT-VERIFIED.
+
 # Nimi release 0.1.6 — Source Runtime support for Catalog Apps
 
 Updates the frozen public npm dependency to Kit/native 0.19.2. The installed App keeps its published native carrier and can connect to a source-development Runtime when launched through Home. Native peer identity checks and Runtime-owned installed-source, session and App Access admission remain mandatory. Production Runtime trust remains unchanged; invalid source Runtime observations fail closed without fallback. SDK 0.21.0, App Tools 0.12.0 and the existing App business workflows are retained.

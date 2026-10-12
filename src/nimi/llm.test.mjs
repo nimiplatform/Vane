@@ -1,7 +1,25 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { z } from 'zod';
 import { NimiEmbedding, NimiLLM } from './llm.ts';
 import { createVaneBusinessContext } from './context.ts';
+
+test('research requests allow automatic model tool choice without forced-tool admission', async () => {
+  let request;
+  const model = new NimiLLM({
+    signal: new AbortController().signal,
+    services: { ai: { scenario: { async execute(input) {
+      request = input;
+      return { output: { type: 'text-generate', finishReason: 'tool-calls', items: [
+        { type: 'tool-call', toolCall: { id: 'call-done', name: 'done', arguments: {} } },
+      ] }, traceId: 'test-trace' };
+    } } } },
+  });
+  await model.generateText({ messages: [{ role: 'user', content: 'Finish the research.' }],
+    tools: [{ name: 'done', description: 'Finish', schema: z.object({}) }] });
+  assert.equal(request.toolChoice, 'auto');
+  assert.equal(request.tools[0].name, 'done');
+});
 
 test('the Vane streaming wrapper preserves opaque continuity for the next researcher step', async () => {
   const inputs = [];

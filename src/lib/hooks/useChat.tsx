@@ -40,6 +40,7 @@ type ChatContext = {
   optimizationMode: string;
   isMessagesLoaded: boolean;
   loading: boolean;
+  uploadingFiles: boolean;
   notFound: boolean;
   messageAppeared: boolean;
   isReady: boolean;
@@ -51,6 +52,7 @@ type ChatContext = {
   setSources: (value: string[]) => void;
   setFiles: (value: File[]) => void;
   setFileIds: (value: string[]) => void;
+  setUploadingFiles: (value: boolean) => void;
   sendMessage: (
     message: string,
     messageId?: string,
@@ -81,6 +83,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const messagesRef = useRef(messages);
   const [files, setFiles] = useState<File[]>([]);
   const [fileIds, setFileIds] = useState<string[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   const [sources, setSources] = useState<string[]>(['web']);
   const [optimizationMode, setOptimizationMode] = useState('speed');
   const [loading, setLoading] = useState(false);
@@ -351,7 +354,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     messageId: string = crypto.randomUUID(),
     rewrite = false,
   ) => {
-    if (starting.current || loading || !query.trim()) return;
+    if (starting.current || loading || uploadingFiles || !query.trim()) return;
     starting.current = true;
     const generation = view.current;
     const runId = crypto.randomUUID();
@@ -447,6 +450,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         chatId,
         optimizationMode,
         loading,
+        uploadingFiles,
         isMessagesLoaded,
         notFound,
         messageAppeared,
@@ -456,6 +460,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         isReady: isMessagesLoaded,
         setFiles,
         setFileIds,
+        setUploadingFiles,
         setSources,
         setOptimizationMode,
         setResearchEnded,

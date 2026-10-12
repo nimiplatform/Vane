@@ -7,7 +7,7 @@ import AttachSmall from './MessageInputActions/AttachSmall';
 import { useChat } from '@/lib/hooks/useChat';
 
 const MessageInput = () => {
-  const { loading, sendMessage, cancel } = useChat();
+  const { loading, uploadingFiles, sendMessage, cancel } = useChat();
 
   const [copilotEnabled, setCopilotEnabled] = useState(false);
   const [message, setMessage] = useState('');
@@ -50,12 +50,12 @@ const MessageInput = () => {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (loading) return;
+        if (loading || uploadingFiles) return;
         sendMessage(message);
         setMessage('');
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' && !e.shiftKey && !loading) {
+        if (e.key === 'Enter' && !e.shiftKey && !loading && !uploadingFiles) {
           e.preventDefault();
           sendMessage(message);
           setMessage('');
@@ -80,7 +80,7 @@ const MessageInput = () => {
       {loading && <button type="button" aria-label="Stop research" onClick={() => void cancel().catch((error) => toast.error(error.message))} className="rounded-full bg-light-200 p-2 dark:bg-dark-200"><Square size={17} /></button>}
       {mode === 'single' && (
         <button
-          disabled={message.trim().length === 0 || loading}
+          disabled={message.trim().length === 0 || loading || uploadingFiles}
           className="bg-[#24A0ED] text-white disabled:text-black/50 dark:disabled:text-white/50 hover:bg-opacity-85 transition duration-100 disabled:bg-[#e0e0dc79] dark:disabled:bg-[#ececec21] rounded-full p-2"
         >
           <ArrowUp className="bg-background" size={17} />
@@ -90,7 +90,7 @@ const MessageInput = () => {
         <div className="flex flex-row items-center justify-between w-full pt-2">
           <AttachSmall />
           <button
-            disabled={message.trim().length === 0 || loading}
+            disabled={message.trim().length === 0 || loading || uploadingFiles}
             className="bg-[#24A0ED] text-white disabled:text-black/50 dark:disabled:text-white/50 hover:bg-opacity-85 transition duration-100 disabled:bg-[#e0e0dc79] dark:disabled:bg-[#ececec21] rounded-full p-2"
           >
             <ArrowUp className="bg-background" size={17} />

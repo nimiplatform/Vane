@@ -83,7 +83,10 @@ export class NimiLLM extends BaseLLM<VaneContext> {
         description: tool.description,
         inputSchema: z.toJSONSchema(tool.schema) as NimiJsonObject,
       })),
-      ...(input.tools?.length ? { toolChoice: 'required' as const } : {}),
+      // The researcher validates that a completed step contains a declared
+      // action before executing callbacks. Automatic choice works with the
+      // selected model without requiring a separate forced-tool behavior.
+      ...(input.tools?.length ? { toolChoice: 'auto' as const } : {}),
       parameters: parameters(input.options),
       signal: this.config.signal,
     };

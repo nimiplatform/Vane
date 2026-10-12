@@ -13,7 +13,7 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 
 const AttachSmall = () => {
-  const { files, setFiles, setFileIds, fileIds } = useChat();
+  const { files, setFiles, setFileIds, fileIds, setUploadingFiles } = useChat();
 
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<any>(null);
@@ -26,6 +26,7 @@ const AttachSmall = () => {
     }
 
     setLoading(true);
+    setUploadingFiles(true);
 
     try {
       const resData = { files: await vane.upload(Array.from(selectedFiles)) };
@@ -39,6 +40,7 @@ const AttachSmall = () => {
       toast(err?.message || 'Failed to upload file(s).');
     } finally {
       setLoading(false);
+      setUploadingFiles(false);
       e.target.value = '';
     }
   };
@@ -53,6 +55,7 @@ const AttachSmall = () => {
         <>
           <PopoverButton
             type="button"
+            aria-label="Attached files"
             className="flex flex-row items-center justify-between space-x-1 p-1 text-black/50 dark:text-white/50 rounded-xl hover:bg-light-secondary dark:hover:bg-dark-secondary active:scale-95 transition duration-200 hover:text-black dark:hover:text-white"
           >
             <File size={20} className="text-sky-500" />
@@ -138,6 +141,7 @@ const AttachSmall = () => {
   ) : (
     <button
       type="button"
+      aria-label="Attach files"
       onClick={() => fileInputRef.current.click()}
       className="flex flex-row items-center space-x-1 text-black/50 dark:text-white/50 rounded-xl hover:bg-light-secondary dark:hover:bg-dark-secondary transition duration-200 hover:text-black dark:hover:text-white p-1"
     >
