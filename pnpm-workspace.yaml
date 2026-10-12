@@ -1,0 +1,4 @@
+packages:
+  - "."
+overrides:
+  officeparser>pdfjs-dist: 6.2.108

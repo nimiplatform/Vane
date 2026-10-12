@@ -29,11 +29,10 @@ upstream revision when updating and review the affected product, dependency,
 license, CI and agent-entry changes together; do not automatically import tags
 or restore retired provider/account paths.
 
-Use Node.js 24 and the pnpm version declared in `package.json`. This branch uses
-published SDK 0.12.0, Kit/native 0.8.0 and App Tools 0.5.3, with nimi-coding pinned
-to 0.6.3. The SDK and Kit releases came from Nimi main
-`9c82151fba95f6397e8b068551208487300343bb`. Install from the checked-in public
-lockfile; local tarballs and parent-checkout overrides are not release inputs.
+Use Node.js 24 and pnpm 10.34.5. Version 0.1.5 selects the published npm
+SDK 0.21.0, Kit/native 0.19.0, App Tools 0.12.0 and Nimi Coding 0.6.5.
+The frozen pnpm lock records registry integrity and contains no Nimi local
+package override. Electron uses the supported 44 series.
 
 The public macOS native carrier uses the production Runtime trust profile.
 Platform-source experiments use Nimi's separately documented development
@@ -56,13 +55,26 @@ Electron Host and prints its loopback CDP endpoint. Nimi's source-development
 Runtime is a separate native trust profile; follow the platform's development
 instructions when working on that profile.
 
-A new development registration has its own managed storage identity. To rebuild and reopen the same App data, run `pnpm exec nimi-app dev --list-registrations`, select the existing registration for this project, then use `pnpm dev -- --resume <selector>`. Selectors belong to the current Desktop session; list again after restarting Nimi. Plain `pnpm dev` creates a new registration. Renderer reload reconnects within the existing Host. Development registration is separate from installed App lifecycle acceptance.
+A new development registration has its own managed storage identity. To rebuild and reopen the same App data, run `pnpm exec nimi-app dev --list-registrations`, select the existing registration for this project, then use `pnpm dev -- --resume <selector>`. Selectors belong to the current Desktop session; list again after restarting Nimi. Plain `pnpm dev` requests an explicit selection when registrations exist. Renderer reload reconnects within the existing Host. A real session invalidation
+retires its business clients, cancels old work and replaces the renderer; the
+ready callback supplies fresh clients. Development registration is separate from
+installed App lifecycle acceptance.
 
 `pnpm exec nimi-app check` checks the managed authoring contract and public
 dependency lock. Run it after synchronization and dependency changes, and before
 packaging. Verify real App behavior separately through the supervised Host.
 
-The current Runtime development slice supports the admitted Gemma 4 local configurations and an exact Codex Responses adapter for `gpt-5.6-sol`, selected through a Nimi-managed Codex connection. Real Codex development checks have exercised tools, structured replies and document retrieval. The `claude-sonnet-4-6` Anthropic Messages adapter has protocol tests but no live acceptance yet. Other catalog models are not implicitly covered by these adapters; availability also depends on the connected provider account.
+Research model steps use the public synchronous carrier so classification,
+structured extraction and function tools can use resources that support those
+behaviors in SYNC mode. Vane continues to own its research loop and progress
+events. The selected resource must support the complete request; a catalog row
+or a ready text resource alone does not establish support for every behavior.
+The Host configures the technical profile supplied by Desktop before loading
+the rest of Kit. The macOS public-package upgrade passes production preflight, 14 tests,
+TypeScript, production build/pack and the packaged native/canvas/PDF/DOCX check.
+Real document upload, retrieval with source citations and saved-result reload
+were exercised through Desktop-supervised development. Catalog installation
+and Windows user journeys require their own verification.
 
 ## Build and release
 

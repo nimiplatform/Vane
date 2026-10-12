@@ -7,7 +7,7 @@ class UploadStore {
   constructor(private params: { embeddingModel: BaseEmbedding<any>; fileIds: string[] }) {}
 
   async query(queries: string[], topK: number): Promise<Chunk[]> {
-    const vectors = await this.params.embeddingModel.embedText(queries);
+    const vectors = await this.params.embeddingModel.embedText(queries, 'retrieval-query');
     const spaceId = this.params.embeddingModel.spaceId;
     const records: { chunk: Chunk; embedding: number[] }[] = [];
     for (const fileId of this.params.fileIds) {

@@ -1,3 +1,11 @@
+# 0.1.5 — Published Nimi dependencies
+
+Uses the released SDK 0.21.0, Kit/native 0.19.0, App Tools 0.12.0 and
+Nimi Coding 0.6.5 from npm. Preserves research, document uploads and managed
+storage. Document and query embeddings carry their explicit retrieval purpose,
+and vector comparisons retain the actual Runtime space. Production dependency
+staging uses the same frozen workspace overrides and unpacks native libraries.
+
 # Vane for Nimi 0.1.4
 
 Adds the publisher declaration for audience, web/social research content, AI text and read-aloud output, external search and location use. Keeps the supported SDK 0.12 / Kit 0.8 pairing and existing business behavior. This metadata release adds no launch gate or safety certification. Publication, Registry admission and installed acceptance remain separate steps.

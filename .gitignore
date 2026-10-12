@@ -47,3 +47,6 @@ dist-electron-package/
 
 # Local Nimi candidate overrides (remove before release)
 /pnpm-workspace.yaml
+
+# The public dependency workspace is part of the reproducible release.
+!/pnpm-workspace.yaml

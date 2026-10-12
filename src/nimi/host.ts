@@ -1,6 +1,4 @@
-import { randomUUID } from 'node:crypto';
 import type {
-  NimiElectronAppBusinessServices,
   NimiElectronCommandHandler,
   NimiElectronCommandHandlerInput,
 } from '@nimiplatform/kit/shell/electron/main';
@@ -11,7 +9,7 @@ import UploadManager, { type FileInput } from '../lib/uploads/manager';
 import generateSuggestions from '../lib/agents/suggestions';
 import searchImages from '../lib/agents/media/image';
 import searchVideos from '../lib/agents/media/video';
-import { inVaneContext, type VaneContext } from './context';
+import { createVaneBusinessContext, inVaneContext, type VaneContext } from './context';
 import { NimiEmbedding, NimiLLM } from './llm';
 import {
   beginMessage,
@@ -74,10 +72,7 @@ function researchErrorMessage(error: unknown): string {
 }
 
 export function createVaneHost() {
-  let services: NimiElectronAppBusinessServices | undefined;
-  let lifetime = new AbortController();
-  let contextId = randomUUID();
-  let closed = false;
+  const binding = createVaneBusinessContext();
   const runs = new Map<
     string,
     {
@@ -87,24 +82,17 @@ export function createVaneHost() {
     }
   >();
   const observers = new Map<string, () => void>();
-  const currentScope = (): VaneContext => {
-    if (!services || closed)
-      throw new Error('The Vane App Host is unavailable.');
-    lifetime.signal.throwIfAborted();
-    return { services, signal: lifetime.signal };
-  };
+  const currentScope = () => binding.current();
   const disconnectObservers = () => {
     for (const stop of observers.values()) stop();
     observers.clear();
   };
   const invalidate = () => {
-    lifetime.abort(new Error('Nimi context changed. Reopen Vane to continue.'));
+    binding.invalidate();
     for (const run of runs.values()) run.controller.abort();
     runs.clear();
     disconnectObservers();
     SessionManager.clear();
-    lifetime = new AbortController();
-    contextId = randomUUID();
   };
   const watch = (
     runId: string,
@@ -153,7 +141,7 @@ export function createVaneHost() {
         .object({ contextId: z.string(), input: z.unknown() })
         .strict()
         .parse(call.payload);
-      if (envelope.contextId !== contextId)
+      if (envelope.contextId !== binding.viewId)
         throw new Error('This Vane view is no longer active. Reopen the App.');
       const scope = currentScope();
       return inVaneContext(scope, () =>
@@ -164,8 +152,9 @@ export function createVaneHost() {
   // This is only an App-view correlation value. Runtime independently admits
   // every SDK operation; it is never a Nimi account or authorization selector.
   commands['vane.initialize'] = () => {
-    currentScope();
-    return { contextId };
+    // View correlation may be read while the technical session is connecting;
+    // actual business commands still require the fresh ready binding above.
+    return { contextId: binding.viewId };
   };
   command('settings.get', z.object({}).strict(), () => readSettings());
   command(
@@ -410,15 +399,12 @@ export function createVaneHost() {
   });
   return {
     commands,
-    bind: (value: NimiElectronAppBusinessServices) => {
-      if (services) throw new Error('Vane services are already bound.');
-      services = value;
-    },
+    bind: binding.bind,
     invalidate,
     disconnectObservers,
     close: () => {
-      closed = true;
       invalidate();
+      binding.close();
     },
   };
 }

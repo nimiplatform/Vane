@@ -77,6 +77,7 @@ try {
   await mkdir(path.join(productionSourceRoot, 'dist-electron'), { recursive: true });
   await copyFile(path.join(appRoot, 'package.json'), path.join(productionSourceRoot, 'package.json'));
   await copyFile(path.join(appRoot, 'pnpm-lock.yaml'), path.join(productionSourceRoot, 'pnpm-lock.yaml'));
+  await copyFile(path.join(appRoot, 'pnpm-workspace.yaml'), path.join(productionSourceRoot, 'pnpm-workspace.yaml'));
   await cp(path.join(appRoot, 'dist'), path.join(productionSourceRoot, 'dist'), { recursive: true, force: false });
   await copyFile(path.join(appRoot, 'dist-electron', 'main.js'), path.join(productionSourceRoot, 'dist-electron', 'main.js'));
   await copyFile(path.join(appRoot, 'dist-electron', 'preload.cjs'), path.join(productionSourceRoot, 'dist-electron', 'preload.cjs'));
@@ -87,6 +88,7 @@ try {
   delete productionManifest.devDependencies;
   await writeFile(productionManifestPath, `${JSON.stringify(productionManifest, null, 2)}\n`);
   await rm(path.join(productionSourceRoot, 'pnpm-lock.yaml'));
+  await rm(path.join(productionSourceRoot, 'pnpm-workspace.yaml'));
 
   const installedNativePackage = path.join(productionSourceRoot, 'node_modules', ...NATIVE_BINDING_PACKAGE.split('/'));
   const nativeDestination = MACOS_BUILD
@@ -110,7 +112,7 @@ try {
     out: outputRoot,
     tmpdir: packagerTempRoot,
     overwrite: false,
-    asar: { unpack: '**/*.node' },
+    asar: { unpack: '**/*.{node,dylib,dll}' },
     ...(MACOS_BUILD ? { extraResource: [path.join(stagingRoot, 'nimi-native')] } : {}),
     prune: false,
     quiet: true,

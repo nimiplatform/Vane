@@ -71,7 +71,7 @@ export class NimiLLM extends BaseLLM<VaneContext> {
   private readonly model: NimiAiModel;
   constructor(scope = vaneContext()) {
     super(scope);
-    this.model = createNimiLocalAppTextModel(scope.services.ai);
+    this.model = createNimiLocalAppTextModel(scope.services.ai, { executionMode: 'sync' });
   }
 
   private request(input: GenerateTextInput): NimiGenerateTextRequest {
@@ -202,6 +202,7 @@ export class NimiLLM extends BaseLLM<VaneContext> {
   }
 }
 
+// @nimi-authority: rule.nimi.runtime.ai-provider.embedding-retrieval-purpose
 export class NimiEmbedding extends BaseEmbedding<VaneContext> {
   private capturedSpaceId: string | undefined;
 
@@ -212,7 +213,7 @@ export class NimiEmbedding extends BaseEmbedding<VaneContext> {
     super(scope);
   }
 
-  async embedText(texts: string[]): Promise<number[][]> {
+  async embedText(texts: string[], purpose: 'retrieval-document' | 'retrieval-query'): Promise<number[][]> {
     const result: number[][] = [];
     for (let start = 0; start < texts.length; start += 16) {
       this.config.signal.throwIfAborted();
@@ -220,7 +221,8 @@ export class NimiEmbedding extends BaseEmbedding<VaneContext> {
       const response = await this.config.services.ai.scenario.execute({
         type: 'text-embed',
         inputs,
-      });
+        purpose,
+      }, { signal: this.config.signal });
       this.config.signal.throwIfAborted();
       if (
         response.output.type !== 'text-embed' ||
@@ -245,6 +247,6 @@ export class NimiEmbedding extends BaseEmbedding<VaneContext> {
   }
 
   embedChunks(chunks: Chunk[]) {
-    return this.embedText(chunks.map((chunk) => chunk.content));
+    return this.embedText(chunks.map((chunk) => chunk.content), 'retrieval-document');
   }
 }

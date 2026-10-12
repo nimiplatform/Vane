@@ -51,7 +51,7 @@ class UploadManager {
       const chunkPaths: string[] = [];
       for (let start = 0; start < texts.length; start += 128) {
         const part = texts.slice(start, start + 128);
-        const vectors = await this.params.embeddingModel.embedText(part);
+        const vectors = await this.params.embeddingModel.embedText(part, 'retrieval-document');
         const chunkPath = `uploads/${fileId}/chunks-${start / 128}.json`;
         await writeAssetJson(chunkPath, part.map((content, index) => ({ content, embedding: vectors[index] })));
         chunkPaths.push(chunkPath);

@@ -11,20 +11,31 @@ import {
   webContents,
   shell,
 } from 'electron';
-import {
-  isAllowedElectronRendererUrl,
-  registerNimiElectronAppAssetProtocolScheme,
-  registerNimiElectronAppBridge,
-} from '@nimiplatform/kit/shell/electron/main';
+import { configureNimiElectronAppHostProfile } from '@nimiplatform/kit/shell/electron/host-profile';
 
 declare const __NIMI_ELECTRON_PRODUCTION__: boolean;
 
 import { APP_ID } from '../src/nimi/constants.js';
-import { createVaneHost } from '../src/nimi/host.js';
+
+try {
+  configureNimiElectronAppHostProfile(app);
+} catch (error) {
+  process.stderr.write(`[nimi-app-host-profile] ${error instanceof Error ? error.message : String(error)}\n`);
+  app.exit(78);
+  throw error;
+}
+
+const {
+  isAllowedElectronRendererUrl,
+  registerNimiElectronAppAssetProtocolScheme,
+  registerNimiElectronAppBridge,
+} = await import('@nimiplatform/kit/shell/electron/main');
+const { createVaneHost } = await import('../src/nimi/host.js');
 const vaneHost = createVaneHost();
 let mainWindow: BrowserWindow | undefined;
 let bridge: ReturnType<typeof registerNimiElectronAppBridge> | undefined;
 let quitting = false;
+let resettingRenderer = false;
 const NATIVE_BUNDLE_IDENTIFIER = 'ai.nimi.apps.nimiplatform.vane';
 const IS_PRODUCTION_BUNDLE =
   typeof __NIMI_ELECTRON_PRODUCTION__ !== 'undefined' &&
@@ -55,13 +66,12 @@ void app.whenReady().then(async () => {
     },
     ipcMain,
     appCommandHandlers: vaneHost.commands,
+    onSessionReady: (services) => vaneHost.bind(services),
     onSessionInvalidated: () => {
       vaneHost.invalidate();
-      if (!quitting && mainWindow && !mainWindow.isDestroyed())
-        mainWindow.reload();
+      resetAccountScopedRenderer();
     },
   });
-  vaneHost.bind(bridge.services);
   await createMainWindow();
   app.on('activate', () => {
     if (!mainWindow || mainWindow.isDestroyed()) void createMainWindow();
@@ -80,8 +90,22 @@ app.on('before-quit', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  if (process.platform !== 'darwin' && !resettingRenderer) app.quit();
 });
+
+function resetAccountScopedRenderer(): void {
+  const windows = BrowserWindow.getAllWindows();
+  if (quitting || windows.length === 0) return;
+  resettingRenderer = true;
+  try {
+    for (const window of windows) window.destroy();
+    void createMainWindow().catch((error: unknown) => {
+      console.error('Vane session view could not be recreated:', error);
+    });
+  } finally {
+    resettingRenderer = false;
+  }
+}
 
 async function createMainWindow(): Promise<void> {
   const window = new BrowserWindow({
@@ -115,7 +139,11 @@ async function createMainWindow(): Promise<void> {
       if (/^https?:/i.test(url)) void shell.openExternal(url);
     }
   });
-  await window.loadURL(rendererUrl);
+  try {
+    await window.loadURL(rendererUrl);
+  } catch (error) {
+    if (!window.isDestroyed()) throw error;
+  }
 }
 
 function readDevelopmentRendererUrl(): string {

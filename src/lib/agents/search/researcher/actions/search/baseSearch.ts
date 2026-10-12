@@ -52,10 +52,11 @@ export const executeSearch = async (input: {
       const res = await fetchResults(q);
 
       if (!res.results.length) return;
-      const [queryEmbedding, ...embeddings] = await input.embedding.embedText([
-        q,
-        ...res.results.map((result) => `${result.title}\n${result.content || ''}`),
-      ]);
+      const [queryEmbedding] = await input.embedding.embedText([q], 'retrieval-query');
+      const embeddings = await input.embedding.embedText(
+        res.results.map((result) => `${result.title}\n${result.content || ''}`),
+        'retrieval-document',
+      );
       const resultChunks: Chunk[] = res.results
         .map((result, index) => ({
           content: result.content || result.title,
