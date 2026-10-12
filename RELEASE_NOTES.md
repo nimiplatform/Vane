@@ -1,3 +1,7 @@
+# Nimi release 0.1.6 — Source Runtime support for Catalog Apps
+
+Updates the frozen public npm dependency to Kit/native 0.19.2. The installed App keeps its published native carrier and can connect to a source-development Runtime when launched through Home. Native peer identity checks and Runtime-owned installed-source, session and App Access admission remain mandatory. Production Runtime trust remains unchanged; invalid source Runtime observations fail closed without fallback. SDK 0.21.0, App Tools 0.12.0 and the existing App business workflows are retained.
+
 # 0.1.5 — Published Nimi dependencies
 
 Uses the released SDK 0.21.0, Kit/native 0.19.0, App Tools 0.12.0 and

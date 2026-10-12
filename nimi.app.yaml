@@ -1,6 +1,6 @@
 app_id: nimiplatform.vane
 display_name: Vane
-version: 0.1.5
+version: 0.1.6
 profile: standalone
 manifest_role: submitted-input
 app_access:
