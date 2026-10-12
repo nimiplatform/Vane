@@ -7,9 +7,9 @@ source-development environment. The App always loads its own packaged native
 carrier. Source Runtime peer identity and installed-App/session admission remain
 verified; no workspace carrier replacement or trust-check bypass is used.
 
-Catalog AI acceptance for this new artifact is pending publication and admission;
-earlier development and installed-artifact results below retain their stated
-versions and limitations.
+Catalog AI acceptance passed on macOS arm64 using the actual [0.1.6 Release](https://github.com/nimiplatform/Vane/releases/tag/v0.1.6) admitted by [Registry PR #73](https://github.com/nimiplatform/nimi-app-registry/pull/73), downloaded and launched through source Nimi Home. Uploaded and embedded a new text document, obtained a cited answer identifying Runtime Bridge, BLUEBIRD-743 and Kit 0.19.2, then quit and relaunched from Home and reopened the saved chat and file. The configured Deepseek model first rejected the requested text behavior; selecting Gemma 4 through the App AI settings completed the same workflow.
+
+Local screenshots and exported results are in `.nimi/local/released-dependencies-20261012/`. Windows interactive acceptance and other unrun AI modalities remain **NOT-VERIFIED**. These results supersede the earlier Catalog limitation; historical results below retain their stated versions.
 
 # Vane for Nimi
 
