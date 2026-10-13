@@ -1,6 +1,8 @@
-## Windows candidate 0.1.7 — 2026-10-13
+## Windows support 0.1.7 — 2026-10-13
 
-Unreleased working tree with published SDK 0.21.0, Kit/native 0.19.3, App Tools 0.12.2 and Nimi Coding 0.6.5. Type checking and 15 tests pass. Desktop-supervised Electron against installed Nimi 0.2.2 uploaded and embedded `windows-acceptance.txt`, returned a cited Chinese answer identifying Lin Lan, Runtime Bridge and six BLUEBIRD-743 observations, and restored that answer after reload. Research uses automatic tool choice with the existing no-action rejection; submission waits for attachment processing. Web search is NOT-VERIFIED because this workspace has no SearxNG service. Candidate installation and Catalog acceptance remain NOT-VERIFIED. Earlier macOS evidence below keeps its original version and scope.
+Uses published SDK 0.21.0, Kit/native 0.19.3, App Tools 0.12.2 and Nimi Coding 0.6.5. Type checking and 15 tests pass. Research uses automatic tool choice with the existing no-action rejection; submission waits for attachment processing. Both Windows supervised development and local imported installation completed document research. Against Nimi 0.2.3-rc.2, the installed release-directory Host uploaded and embedded `windows-acceptance.txt`, then used qwen3.8-flash and text-embedding-v4 to return a cited Chinese answer identifying Lin Lan, Runtime Bridge, six observations and the rule against replacing missing data with zero. Normal close, relaunch from Home's Imported source, and opening the Library restored the same attachment and answer. Installed interaction used native UI without production CDP.
+
+The first MiMo v2.6 Flash research attempt returned `ai-text-behavior-unsupported`; its failure remains in the conversation. Vane requires tools and structured output, so that unsupported combination is not counted as model-quality acceptance. Web search is NOT-VERIFIED because this workspace has no SearxNG service. Catalog installation of this new version remains a separate delivery step. Earlier macOS evidence below keeps its original version and scope.
 
 ## Catalog App support for source Runtime — 0.1.6
 

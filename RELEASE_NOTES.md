@@ -1,6 +1,6 @@
-# 0.1.7 — Windows candidate (unreleased)
+# 0.1.7 — Windows document research
 
-Uses published SDK 0.21.0, Kit/native 0.19.3 and App Tools 0.12.2. Research uses automatic tool choice while still rejecting a completed step without a declared action. Document processing blocks submission until the attachment is ready, preserving the query and its file context. Windows document indexing, cited Chinese answers and saved-chat reload were exercised through Desktop-supervised Electron against installed Nimi 0.2.2. Catalog installation of this candidate remains NOT-VERIFIED.
+Uses published SDK 0.21.0, Kit/native 0.19.3 and App Tools 0.12.2. Research uses automatic tool choice while still rejecting a completed step without a declared action. Document processing blocks submission until the attachment is ready, preserving the query and its file context. Windows development and the locally imported installation passed document indexing, cited Chinese answers and saved-chat restoration after closing and reopening the App. The installed workflow used qwen3.8-flash and text-embedding-v4 with Nimi 0.2.3-rc.2; MiMo's unsupported structured-output combination is recorded separately. Web search needs a configured SearxNG service, and Catalog installation of this version remains a separate delivery step.
 
 # Nimi release 0.1.6 — Source Runtime support for Catalog Apps
 
