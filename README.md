@@ -23,8 +23,10 @@ Home relaunch restored all four chats, including the successful answer and
 earlier failures. The successful chat is
 `61049960-574a-4e7f-92b9-0b4fa7646da3`. The Home news widget still reported an
 upstream loading failure; news availability is not claimed. The annotated
-v0.1.8 tag points to tested source 0b38230; formal publication and Registry
-admission remain separate from this local installed acceptance.
+v0.1.8 tag points to tested source 0b38230. The [immutable release](https://github.com/nimiplatform/Vane/releases/tag/v0.1.8)
+is published for both targets, and exact packages, licenses and build provenance
+passed Registry preparation. [Candidate #102](https://github.com/nimiplatform/nimi-app-registry/pull/102)
+replaces withdrawn #94. Human admission and Catalog installation remain pending.
 
 ## Windows support 0.1.7 — 2026-10-13
 
