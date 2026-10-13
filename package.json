@@ -1,6 +1,6 @@
 {
   "name": "vane",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "license": "MIT",
   "author": "ItzCrazyKns",
   "scripts": {
@@ -10,7 +10,7 @@
     "build:electron": "node scripts/build-electron.mjs",
     "build:electron:production": "node scripts/clean-electron-production.mjs && pnpm run typecheck && pnpm run build && pnpm run build:electron && node scripts/package-electron-production.mjs && node scripts/check-electron-package.cjs",
     "typecheck": "tsc --noEmit",
-    "test:app": "tsx --test src/lib/session.test.mjs src/lib/utils/splitText.test.mjs src/lib/agents/search/researcher/actions/registry.test.mjs src/nimi/llm.test.mjs",
+    "test:app": "tsx --test src/lib/session.test.mjs src/lib/utils/splitText.test.mjs src/lib/agents/search/researcher/actions/registry.test.mjs src/nimi/llm.test.mjs src/components/MessageRenderer/citations.test.mjs",
     "check": "nimi-app check",
     "test": "nimi-app test",
     "app:build": "nimi-app build",
@@ -63,7 +63,7 @@
     "jspdf": "^4.2.1",
     "lightweight-charts": "^5.0.9",
     "lucide-react": "^0.556.0",
-    "markdown-to-jsx": "^7.7.2",
+    "markdown-to-jsx": "^9.10.3",
     "motion": "^12.23.26",
     "next-themes": "^0.4.6",
     "postcss": "^8",

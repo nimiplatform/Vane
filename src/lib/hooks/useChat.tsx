@@ -16,7 +16,6 @@ import type {
   ResearchUpdate,
   VaneFile as File,
 } from '@/nimi/contracts';
-import type { Block } from '@/lib/types';
 import type { Widget } from '@/components/ChatWindow';
 import type { SearchSources } from '@/lib/agents/search/types';
 
@@ -106,11 +105,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       let thinkingEnded = false;
       let suggestions: string[] = [];
 
-      const sourceBlocks = msg.responseBlocks.filter(
-        (block): block is Block & { type: 'source' } => block.type === 'source',
-      );
-      const sources = sourceBlocks.flatMap((block) => block.data);
-
       const widgetBlocks = msg.responseBlocks
         .filter((b) => b.type === 'widget')
         .map((b) => b.data) as Widget[];
@@ -118,7 +112,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       msg.responseBlocks.forEach((block) => {
         if (block.type === 'text') {
           let processedText = block.data;
-          const citationRegex = /\[([^\]]+)\]/g;
           const regex = /\[(\d+)\]/g;
 
           if (processedText.includes('<think>')) {
@@ -135,41 +128,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             thinkingEnded = true;
           }
 
-          if (sources.length > 0) {
-            processedText = processedText.replace(
-              citationRegex,
-              (_, capturedContent: string) => {
-                const numbers = capturedContent
-                  .split(',')
-                  .map((numStr) => numStr.trim());
-
-                const linksHtml = numbers
-                  .map((numStr) => {
-                    const number = parseInt(numStr);
-
-                    if (isNaN(number) || number <= 0) {
-                      return `[${numStr}]`;
-                    }
-
-                    const source = sources[number - 1];
-                    const url = source?.metadata?.url;
-
-                    if (url) {
-                      return `<citation href="${url}">${numStr}</citation>`;
-                    } else {
-                      return ``;
-                    }
-                  })
-                  .join('');
-
-                return linksHtml;
-              },
-            );
-            speechMessage += block.data.replace(regex, '');
-          } else {
-            processedText = processedText.replace(regex, '');
-            speechMessage += block.data.replace(regex, '');
-          }
+          speechMessage += block.data.replace(regex, '');
 
           textBlocks.push(processedText);
         } else if (block.type === 'suggestion') {

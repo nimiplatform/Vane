@@ -1,3 +1,9 @@
+## Windows candidate 0.1.8 — 2026-10-14
+
+Fixes the citation display failure observed during real web research. The previous Markdown parser misread an inline Windows backslash, and the App's pre-parse HTML replacement could expose internal citation tags or rewrite code and link labels. The updated parser and post-parse React citation rendering preserve code, ordinary links and unresolved references without interpolating source URLs into HTML. Stored model answers and source records are unchanged.
+
+Type checking and all 21 App tests pass, including six regressions for backslashes, inline/fenced code, links, missing references and quoted URLs. Through the existing Desktop-supervised CDP target, the original saved web answer now displays its backslash and citation links correctly with no exposed tag. The previous document answer still opens the actual uploaded source passage from its numbered citation. Windows production build/pack and the packaged Electron native, canvas and document-extraction checks pass. Local installed-package verification and publication of 0.1.8 remain pending.
+
 ## Windows support 0.1.7 — 2026-10-13
 
 Uses published SDK 0.21.0, Kit/native 0.19.3, App Tools 0.12.2 and Nimi Coding 0.6.5. Type checking and 15 tests pass. Research uses automatic tool choice with the existing no-action rejection; submission waits for attachment processing. Both Windows supervised development and local imported installation completed document research. Against Nimi 0.2.3-rc.2, the installed release-directory Host uploaded and embedded `windows-acceptance.txt`, then used qwen3.8-flash and text-embedding-v4 to return a cited Chinese answer identifying Lin Lan, Runtime Bridge, six observations and the rule against replacing missing data with zero. Normal close, relaunch from Home's Imported source, and opening the Library restored the same attachment and answer. Installed interaction used native UI without production CDP.

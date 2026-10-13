@@ -14,7 +14,7 @@ import {
   Plus,
   CornerDownRight,
 } from 'lucide-react';
-import Markdown, { MarkdownToJSX, RuleType } from 'markdown-to-jsx';
+import Markdown, { MarkdownToJSX, RuleType } from 'markdown-to-jsx/react';
 import Copy from './MessageActions/Copy';
 import Rewrite from './MessageActions/Rewrite';
 import MessageSources from './MessageSources';
@@ -23,7 +23,7 @@ import SearchVideos from './SearchVideos';
 import { useSpeech } from 'react-text-to-speech';
 import ThinkBox from './ThinkBox';
 import { useChat, Section } from '@/lib/hooks/useChat';
-import Citation from './MessageRenderer/Citation';
+import { createCitationRenderRule } from './MessageRenderer/citations';
 import AssistantSteps from './AssistantSteps';
 import { ResearchBlock, type Chunk } from '@/lib/types';
 import Renderer from './Widgets/Renderer';
@@ -81,12 +81,9 @@ const MessageBox = ({
 
   const { speechStatus, start, stop } = useSpeech({ text: speechMessage });
 
+  const renderCitation = createCitationRenderRule(sources, openFile);
   const markdownOverrides: MarkdownToJSX.Options = {
     renderRule(next, node, renderChildren, state) {
-      if (node.type === RuleType.codeInline) {
-        return `\`${node.text}\``;
-      }
-
       if (node.type === RuleType.codeBlock) {
         return (
           <CodeBlock key={state.key} language={node.lang || ''}>
@@ -95,7 +92,7 @@ const MessageBox = ({
         );
       }
 
-      return next();
+      return renderCitation(next, node, renderChildren, state);
     },
     overrides: {
       think: {
@@ -103,10 +100,6 @@ const MessageBox = ({
         props: {
           thinkingEnded: thinkingEnded,
         },
-      },
-      citation: {
-        component: Citation,
-        props: { onOpenFile: openFile },
       },
     },
   };
