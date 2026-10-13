@@ -2,7 +2,29 @@
 
 Fixes the citation display failure observed during real web research. The previous Markdown parser misread an inline Windows backslash, and the App's pre-parse HTML replacement could expose internal citation tags or rewrite code and link labels. The updated parser and post-parse React citation rendering preserve code, ordinary links and unresolved references without interpolating source URLs into HTML. Stored model answers and source records are unchanged.
 
-Type checking and all 21 App tests pass, including six regressions for backslashes, inline/fenced code, links, missing references and quoted URLs. Through the existing Desktop-supervised CDP target, the original saved web answer now displays its backslash and citation links correctly with no exposed tag. The previous document answer still opens the actual uploaded source passage from its numbered citation. Windows production build/pack and the packaged Electron native, canvas and document-extraction checks pass. Local installed-package verification and publication of 0.1.8 remain pending.
+Type checking and all 21 App tests pass, including six regressions for backslashes, inline/fenced code, links, missing references and quoted URLs. Through the existing Desktop-supervised CDP target, the original saved web answer now displays its backslash and citation links correctly with no exposed tag. The previous document answer still opens the actual uploaded source passage from its numbered citation. Windows production build/pack and the packaged Electron native, canvas and document-extraction checks pass.
+
+On October 14, installed Nimi 0.2.4-rc.1 updated the Imported Windows App from
+0.1.7 to 0.1.8, preserving the original document chat and source passage.
+Opening its numbered citation still displayed the uploaded text. The retained
+Web source option was initially off; direct official-page reading passed in
+that mode. After enabling Web, one `ai-output-invalid` request and two search
+engine failures remained recorded. The local SearxNG service was tuned through
+its [documented engine settings](https://docs.searxng.org/admin/settings/settings.html)
+and [outgoing timeouts](https://docs.searxng.org/admin/settings/settings_outgoing.html):
+Bing enabled, Brave and DuckDuckGo disabled after repeated rate-limit/CAPTCHA
+responses, request timeout 10 seconds and maximum 15 seconds. This only changes
+the local acceptance service; the App still uses its configured service URL.
+
+The subsequent installed research task ran three real queries, found 60
+results, read one source and returned a Chinese comparison with numbered
+official Python citations and intact Windows-backslash code. Normal close and
+Home relaunch restored all four chats, including the successful answer and
+earlier failures. The successful chat is
+`61049960-574a-4e7f-92b9-0b4fa7646da3`. The Home news widget still reported an
+upstream loading failure; news availability is not claimed. The annotated
+v0.1.8 tag points to tested source 0b38230; formal publication and Registry
+admission remain separate from this local installed acceptance.
 
 ## Windows support 0.1.7 — 2026-10-13
 
