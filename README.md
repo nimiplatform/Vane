@@ -26,7 +26,12 @@ upstream loading failure; news availability is not claimed. The annotated
 v0.1.8 tag points to tested source 0b38230. The [immutable release](https://github.com/nimiplatform/Vane/releases/tag/v0.1.8)
 is published for both targets, and exact packages, licenses and build provenance
 passed Registry preparation. [Candidate #102](https://github.com/nimiplatform/nimi-app-registry/pull/102)
-replaces withdrawn #94. Human admission and Catalog installation remain pending.
+replaces withdrawn #94. The user approved the existing dual-platform stable
+candidate on October 14; finalization passed and #102 merged. The superseded
+0.1.4 safety candidate #62 was closed. Installed Nimi 0.2.4 discovers the new
+Catalog version and its real package download is in progress. Slow transfer
+currently leaves Catalog installation and Catalog business acceptance
+NOT-VERIFIED; the passing Imported results above remain separate evidence.
 
 ## Windows support 0.1.7 — 2026-10-13
 
