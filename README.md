@@ -28,10 +28,23 @@ is published for both targets, and exact packages, licenses and build provenance
 passed Registry preparation. [Candidate #102](https://github.com/nimiplatform/nimi-app-registry/pull/102)
 replaces withdrawn #94. The user approved the existing dual-platform stable
 candidate on October 14; finalization passed and #102 merged. The superseded
-0.1.4 safety candidate #62 was closed. Installed Nimi 0.2.4 discovers the new
-Catalog version and its real package download is in progress. Slow transfer
-currently leaves Catalog installation and Catalog business acceptance
-NOT-VERIFIED; the passing Imported results above remain separate evidence.
+0.1.4 safety candidate #62 was closed. The slow Catalog download subsequently
+completed and installed the original 0.1.8 Windows package on Nimi 0.2.4.
+Home launched its distinct Catalog release-directory Host. A fresh document
+upload used text-embedding-v4, and qwen3.8-flash returned the correct Lin Lan,
+Runtime Bridge, six-observation and no-zero-fill facts with file citations.
+Opening a numbered citation displayed the actual uploaded source passage.
+The first request correctly refused Web research because the new Catalog
+workspace had no SearxNG URL; disabling Web for this document-only task allowed
+the next request to complete. That prerequisite failure remains recorded.
+
+Home's account session later expired, interrupting the App connection. After
+the user signed in again, Home relaunched the same Catalog instance and its
+Library restored the answer, source and citations without regeneration. The
+successful chat is `0bfed5ca-d2ba-4592-a113-842e83651e33`. Fresh Windows Catalog
+download/install, document research and reopen therefore pass. The prior
+Imported update and Web-research evidence retain their separate scopes;
+Catalog N-to-N+1 update and Web search in this new workspace were not run.
 
 ## Windows support 0.1.7 — 2026-10-13
 
