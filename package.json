@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "@nimiplatform/kit": "^0.19.0",
-    "@nimiplatform/sdk": "^0.21.0",
+    "@nimiplatform/kit": "^0.22.1",
+    "@nimiplatform/sdk": "^0.22.2",
     "js-tiktoken": "^1.0.21",
     "jsdom": "^29.0.1",
     "mathjs": "^15.1.0",
@@ -41,8 +41,8 @@
     "@headlessui/react": "^2.2.0",
     "@headlessui/tailwindcss": "^0.2.2",
     "@icons-pack/react-simple-icons": "^12.3.0",
-    "@nimiplatform/app-tools": "^0.12.2",
-    "@nimiplatform/nimi-coding": "0.6.5",
+    "@nimiplatform/app-tools": "^0.14.0",
+    "@nimiplatform/nimi-coding": "0.7.0",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/typography": "^0.5.12",
@@ -86,7 +86,7 @@
   "type": "module",
   "private": true,
   "main": "dist-electron/main.js",
-  "packageManager": "pnpm@10.34.5",
+  "packageManager": "pnpm@10.34.7",
   "pnpm": {
     "onlyBuiltDependencies": [
       "electron",

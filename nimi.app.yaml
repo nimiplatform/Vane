@@ -45,7 +45,6 @@ storage_policy:
 metadata:
   summary: Search, research and read documents with Nimi-managed AI.
   icon: public/icon.png
-  readme: README.md
   release_notes: RELEASE_NOTES.md
 local_development:
   electron:
