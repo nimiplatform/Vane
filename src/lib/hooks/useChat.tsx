@@ -10,7 +10,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { applyPatch } from 'rfc6902';
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import type {
   ResearchMessage as Message,
   ResearchUpdate,
@@ -74,6 +74,7 @@ const toHistory = (messages: Message[]): [string, string][] =>
   });
 
 export function ChatProvider({ children }: { children: ReactNode }) {
+  const vane = useVane();
   const location = useLocation();
   const navigate = useNavigate();
   const [chatId, setChatId] = useState<string>(() => crypto.randomUUID());
@@ -148,7 +149,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [messages]);
 
   const update =
-    (messageId: string, generation: number) => (data: ResearchUpdate) => {
+    (messageId: string, generation: number, requestSuggestions = false) => (data: ResearchUpdate) => {
       if (generation !== view.current) return;
       if (data.type === 'researchComplete') {
         setResearchEnded(true);
@@ -205,6 +206,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           .then((saved) => {
             if (generation !== view.current || !saved) return;
             setMessages(saved.messages);
+            if (!requestSuggestions) return;
             void vane
               .suggestions(toHistory(saved.messages))
               .then((suggestions) => {
@@ -352,7 +354,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           sources: sources as SearchSources[],
           mode: optimizationMode as 'speed' | 'balanced' | 'quality',
         },
-        update(messageId, generation),
+        update(messageId, generation, true),
       );
       if (generation !== view.current) stop();
       else observer.current = stop;

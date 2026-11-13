@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import { cn } from '@/lib/utils';
 import {
   Popover,
@@ -22,6 +22,7 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 
 const Attach = () => {
+  const vane = useVane();
   const { files, setFiles, setFileIds, fileIds, setUploadingFiles } = useChat();
 
   const [loading, setLoading] = useState(false);

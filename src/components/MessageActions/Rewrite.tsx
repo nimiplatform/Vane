@@ -9,6 +9,7 @@ const Rewrite = ({
 }) => {
   return (
     <button
+      aria-label="Regenerate answer"
       onClick={() => rewrite(messageId)}
       className="p-2 text-black/70 dark:text-white/70 rounded-full hover:bg-light-secondary dark:hover:bg-dark-secondary transition duration-200 hover:text-black dark:hover:text-white flex flex-row items-center space-x-1"
     >

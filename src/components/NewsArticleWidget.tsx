@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import { useEffect, useState } from 'react';
 
 interface Article {
@@ -9,6 +9,7 @@ interface Article {
 }
 
 const NewsArticleWidget = () => {
+  const vane = useVane();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

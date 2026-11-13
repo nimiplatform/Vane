@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import { Trash } from 'lucide-react';
 import {
   Description,
@@ -24,6 +24,7 @@ const DeleteChat = ({
   setChats: (chats: Chat[]) => void;
   redirect?: boolean;
 }) => {
+  const vane = useVane();
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -50,6 +51,7 @@ const DeleteChat = ({
   return (
     <>
       <button
+        aria-label="Delete chat"
         onClick={() => {
           setConfirmationDialogOpen(true);
         }}

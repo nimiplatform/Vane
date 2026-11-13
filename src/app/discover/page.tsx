@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 ('use client');
 
 import { Globe2Icon } from 'lucide-react';
@@ -39,6 +39,7 @@ const topics: { key: string; display: string }[] = [
 ];
 
 const Page = () => {
+  const vane = useVane();
   const [discover, setDiscover] = useState<Discover[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

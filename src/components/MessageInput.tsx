@@ -80,6 +80,7 @@ const MessageInput = () => {
       {loading && <button type="button" aria-label="Stop research" onClick={() => void cancel().catch((error) => toast.error(error.message))} className="rounded-full bg-light-200 p-2 dark:bg-dark-200"><Square size={17} /></button>}
       {mode === 'single' && (
         <button
+          aria-label="Send follow-up"
           disabled={message.trim().length === 0 || loading || uploadingFiles}
           className="bg-[#24A0ED] text-white disabled:text-black/50 dark:disabled:text-white/50 hover:bg-opacity-85 transition duration-100 disabled:bg-[#e0e0dc79] dark:disabled:bg-[#ececec21] rounded-full p-2"
         >
@@ -90,6 +91,7 @@ const MessageInput = () => {
         <div className="flex flex-row items-center justify-between w-full pt-2">
           <AttachSmall />
           <button
+            aria-label="Send follow-up"
             disabled={message.trim().length === 0 || loading || uploadingFiles}
             className="bg-[#24A0ED] text-white disabled:text-black/50 dark:disabled:text-white/50 hover:bg-opacity-85 transition duration-100 disabled:bg-[#e0e0dc79] dark:disabled:bg-[#ececec21] rounded-full p-2"
           >

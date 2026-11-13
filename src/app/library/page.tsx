@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import { toast } from 'sonner';
 'use client';
 
@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 export type Chat = import('@/nimi/contracts').ChatRecord;
 
 const Page = () => {
+  const vane = useVane();
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
 

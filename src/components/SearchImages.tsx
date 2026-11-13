@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import { toast } from 'sonner';
 /* eslint-disable @next/next/no-img-element */
 import { ImagesIcon, PlusIcon } from 'lucide-react';
@@ -22,6 +22,7 @@ const SearchImages = ({
   chatHistory: [string, string][];
   messageId: string;
 }) => {
+  const vane = useVane();
   const [images, setImages] = useState<Image[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);

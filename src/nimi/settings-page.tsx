@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ModelConfigAIConfigSurface } from '@nimiplatform/kit/features/model-config';
 import type { NimiAIConfigSnapshot } from '@nimiplatform/sdk/ai';
-import { vane } from './client';
+import { useVane } from './client-context';
 import { APP_ID } from './constants';
 import { defaultSettings, type VaneSettings } from './contracts';
 import { setClientSettings } from '../lib/config/clientRegistry';
@@ -10,6 +10,7 @@ import { setClientSettings } from '../lib/config/clientRegistry';
 const field =
   'w-full rounded-lg border border-light-200 dark:border-dark-200 bg-light-primary dark:bg-dark-primary px-3 py-2 text-sm';
 export default function SettingsPage() {
+  const vane = useVane();
   const [params] = useSearchParams();
   const [section, setSection] = useState(params.get('section') ?? 'search');
   const [settings, setSettings] = useState<VaneSettings>(defaultSettings);
@@ -39,7 +40,7 @@ export default function SettingsPage() {
       })
       .catch((error) => setMessage(error.message))
       .finally(() => setLoading(false));
-    void refreshAI();
+    if (vane.kind === 'desktop') void refreshAI();
   }, []);
   const save = async () => {
     setBusy(true);
@@ -86,7 +87,7 @@ export default function SettingsPage() {
             embeddings. Choose a text configuration with tools and structured
             output enabled in Nimi.
           </p>
-          <ModelConfigAIConfigSurface
+          {vane.kind === 'web' ? <p className="rounded-lg border border-light-200 dark:border-dark-200 p-4 text-sm">Research runs in your PC Vane workspace. Open PC Vane → Settings → AI models to review or change the text and embedding models. This browser does not copy model credentials or change the PC’s AI configuration.</p> : <ModelConfigAIConfigSurface
             context={{ owner: 'app-ai-config', appId: APP_ID }}
             capabilityContracts={['text.generate', 'text.embed']}
             capabilities={ai?.config?.capabilities ?? (ai ? null : undefined)}
@@ -102,7 +103,7 @@ export default function SettingsPage() {
               return result;
             }}
             language="en"
-          />
+          />}
         </>
       ) : loading ? (
         <p>Loading settings…</p>
@@ -110,6 +111,7 @@ export default function SettingsPage() {
         <div className="space-y-5">
           {section === 'search' ? (
             <>
+              {vane.kind === 'web' ? <div className="space-y-3 text-sm"><p>{settings.searxngURL ? 'A search service is configured in the PC workspace.' : 'Web research needs a search service. Configure and test SearxNG in PC Vane → Settings → Search.'}</p><p>The PC makes search requests. This browser uses the same saved research library; no search credentials or local service address are copied here.</p></div> : <>
               <div>
                 <label
                   className="mb-2 block text-sm font-medium"
@@ -157,6 +159,7 @@ export default function SettingsPage() {
               >
                 Test connection
               </button>
+              </>}
             </>
           ) : (
             <>
@@ -219,7 +222,7 @@ export default function SettingsPage() {
               </label>
             </>
           )}
-          <div>
+          {(vane.kind === 'desktop' || section === 'preferences') && <div>
             <button
               disabled={busy}
               onClick={() => void save()}
@@ -227,7 +230,7 @@ export default function SettingsPage() {
             >
               {busy ? 'Working…' : 'Save settings'}
             </button>
-          </div>
+          </div>}
           {message && (
             <p role="status" className="text-sm">
               {message}

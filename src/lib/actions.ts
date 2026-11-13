@@ -1,7 +1,3 @@
-import { vane } from '@/nimi/client';
-export const getSuggestions = (chatHistory: [string, string][]) =>
-  vane.suggestions(chatHistory);
-
 export const getApproxLocation = async () => {
   const res = await fetch('https://free.freeipapi.com/api/json', {
     method: 'GET',

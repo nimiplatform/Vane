@@ -22,6 +22,9 @@ test('reconnecting observes current blocks, budget reason and terminal result wi
     { type: 'researchComplete', reason: 'budget' },
     { type: 'messageEnd' },
   ]);
+  assert.deepEqual(session.snapshot(),snapshot);
+  const remote=session.snapshot();remote[0].block.data='caller mutation';
+  assert.equal(session.snapshot()[0].block.data,'final');
 });
 
 test('cancellation prevents late block mutation while retaining a visible terminal state', () => {

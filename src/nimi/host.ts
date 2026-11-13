@@ -97,7 +97,7 @@ export function createVaneHost() {
   const watch = (
     runId: string,
     watchId: string,
-    call: NimiElectronCommandHandlerInput,
+    call: Pick<NimiElectronCommandHandlerInput, 'sendEvent'>,
   ) => {
     const session = SessionManager.getSession(runId);
     if (!session || !call.sendEvent)
@@ -127,15 +127,22 @@ export function createVaneHost() {
     return saved;
   };
   const commands: Record<string, NimiElectronCommandHandler> = {};
+  type BusinessCall = Pick<NimiElectronCommandHandlerInput, 'sendEvent'>;
+  const actions = new Map<string, (input: unknown, call: BusinessCall) => unknown>();
   const command = <T>(
     name: string,
     schema: z.ZodType<T>,
     action: (
       value: T,
-      call: NimiElectronCommandHandlerInput,
+      call: BusinessCall,
       scope: VaneContext,
     ) => unknown,
   ) => {
+    const run = (input: unknown, call: BusinessCall) => {
+      const scope = currentScope();
+      return inVaneContext(scope, () => action(schema.parse(input), call, scope));
+    };
+    actions.set(name, run);
     commands[`vane.${name}`] = (call) => {
       const envelope = z
         .object({ contextId: z.string(), input: z.unknown() })
@@ -143,10 +150,7 @@ export function createVaneHost() {
         .parse(call.payload);
       if (envelope.contextId !== binding.viewId)
         throw new Error('This Vane view is no longer active. Reopen the App.');
-      const scope = currentScope();
-      return inVaneContext(scope, () =>
-        action(schema.parse(envelope.input), call, scope),
-      );
+      return run(envelope.input, call);
     };
   };
   // This is only an App-view correlation value. Runtime independently admits
@@ -298,7 +302,7 @@ export function createVaneHost() {
       signal: AbortSignal.any([parent.signal, controller.signal]),
     };
     const session = SessionManager.createSession(input.runId, scope.signal);
-    watch(input.runId, input.watchId, call);
+    if (call.sendEvent) watch(input.runId, input.watchId, call);
     const message: ResearchMessage = {
       chatId: input.chatId,
       messageId: input.messageId,
@@ -399,6 +403,17 @@ export function createVaneHost() {
   });
   return {
     commands,
+    // The remote provider owns a bounded App-business allowlist, never a
+    // renderer bridge or generic Runtime operation selector.
+    execute: (name: string, input: unknown) => {
+      const action = actions.get(name);
+      if (!action) throw new Error('Unknown Vane business operation.');
+      return action(input, {});
+    },
+    readResearch: (runId: string) => {
+      currentScope();
+      return SessionManager.getSession(id.parse(runId))?.snapshot() ?? null;
+    },
     bind: binding.bind,
     invalidate,
     disconnectObservers,

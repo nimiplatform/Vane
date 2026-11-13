@@ -75,6 +75,7 @@ const EmptyChatMessageInput = () => {
               <Attach />
             </div>
             <button
+              aria-label="Start research"
               disabled={message.trim().length === 0 || uploadingFiles}
               className="bg-sky-500 text-white disabled:text-black/50 dark:disabled:text-white/50 disabled:bg-[#e0e0dc] dark:disabled:bg-[#ececec21] hover:bg-opacity-85 transition duration-100 rounded-full p-2"
             >

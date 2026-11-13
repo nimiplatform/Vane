@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import {
   Popover,
   PopoverButton,
@@ -13,6 +13,7 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 
 const AttachSmall = () => {
+  const vane = useVane();
   const { files, setFiles, setFileIds, fileIds, setUploadingFiles } = useChat();
 
   const [loading, setLoading] = useState(false);

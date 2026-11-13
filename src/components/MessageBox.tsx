@@ -198,6 +198,8 @@ const MessageBox = ({
                   </Link>{' '}
                   to configure one, then try your request again.
                 </>
+              ) : section.message.errorMessage === 'ai-output-invalid' ? (
+                <>The model returned an invalid response, so this research did not finish. The saved result is unchanged. Review the model in PC Vane’s AI settings before explicitly starting another request.</>
               ) : (
                 section.message.errorMessage
               )}
@@ -226,15 +228,16 @@ const MessageBox = ({
 
             {hasContent && (
               <>
-                <Markdown
+                <div
                   className={cn(
                     'prose prose-h1:mb-3 prose-h2:mb-2 prose-h2:mt-6 prose-h2:font-[800] prose-h3:mt-4 prose-h3:mb-1.5 prose-h3:font-[600] dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 font-[400]',
                     'max-w-none break-words text-black dark:text-white',
                   )}
-                  options={markdownOverrides}
                 >
+                <Markdown options={markdownOverrides}>
                   {parsedMessage}
                 </Markdown>
+                </div>
 
                 {loading && isLast ? null : (
                   <div className="flex flex-row items-center justify-between w-full text-black dark:text-white py-4">
@@ -247,6 +250,7 @@ const MessageBox = ({
                     <div className="flex flex-row items-center -mr-2">
                       <Copy initialMessage={parsedMessage} section={section} />
                       <button
+                        aria-label={speechStatus === 'started' ? 'Stop reading answer' : 'Read answer aloud'}
                         onClick={() => {
                           if (speechStatus === 'started') {
                             stop();

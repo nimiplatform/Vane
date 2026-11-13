@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import { toast } from 'sonner';
 /* eslint-disable @next/next/no-img-element */
 import { PlayCircle, PlayIcon, PlusIcon, VideoIcon } from 'lucide-react';
@@ -35,6 +35,7 @@ const Searchvideos = ({
   chatHistory: [string, string][];
   messageId: string;
 }) => {
+  const vane = useVane();
   const [videos, setVideos] = useState<Video[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);

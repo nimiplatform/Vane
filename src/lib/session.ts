@@ -101,6 +101,14 @@ class SessionManager {
     return structuredClone([...this.blocks.values()]);
   }
 
+  snapshot(): ResearchUpdate[] {
+    return [
+      ...this.getAllBlocks().map((block): ResearchUpdate => ({ type: 'block', block })),
+      ...(this.researchComplete ? [structuredClone(this.researchComplete)] : []),
+      ...(this.terminal ? [structuredClone(this.terminal)] : []),
+    ];
+  }
+
   subscribe(listener: Listener): () => void {
     // The current block projection is a complete reconnect snapshot. A token
     // stream transcript is unnecessary and would grow quadratically as blocks

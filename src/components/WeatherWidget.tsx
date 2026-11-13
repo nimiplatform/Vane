@@ -1,4 +1,4 @@
-import { vane } from '@/nimi/client';
+import { useVane } from '@/nimi/client-context';
 import { getMeasurementUnit } from '@/lib/config/clientRegistry';
 ('use client');
 
@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { getApproxLocation } from '@/lib/actions';
 
 const WeatherWidget = () => {
+  const vane = useVane();
   const [data, setData] = useState({
     temperature: 0,
     condition: '',

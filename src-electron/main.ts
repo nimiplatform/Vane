@@ -31,7 +31,9 @@ const {
   registerNimiElectronAppBridge,
 } = await import('@nimiplatform/kit/shell/electron/main');
 const { createVaneHost } = await import('../src/nimi/host.js');
+const { VaneRemoteProvider } = await import('../src/nimi/remote-provider.js');
 const vaneHost = createVaneHost();
+let remoteProvider: InstanceType<typeof VaneRemoteProvider> | undefined;
 let mainWindow: BrowserWindow | undefined;
 let bridge: ReturnType<typeof registerNimiElectronAppBridge> | undefined;
 let quitting = false;
@@ -69,8 +71,9 @@ void app.whenReady().then(async () => {
     },
     ipcMain,
     appCommandHandlers: vaneHost.commands,
-    onSessionReady: (services) => vaneHost.bind(services),
+    onSessionReady: (services) => { vaneHost.bind(services); remoteProvider = new VaneRemoteProvider(services, vaneHost); },
     onSessionInvalidated: () => {
+      remoteProvider?.close(); remoteProvider = undefined;
       vaneHost.invalidate();
       resetAccountScopedRenderer();
     },
@@ -88,6 +91,7 @@ void app.whenReady().then(async () => {
 
 app.on('before-quit', () => {
   quitting = true;
+  remoteProvider?.close();
   vaneHost.close();
   bridge?.unregister();
 });

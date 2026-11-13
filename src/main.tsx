@@ -1,16 +1,11 @@
 import { createRoot } from 'react-dom/client';
 import { useEffect, useState, type ReactNode } from 'react';
-import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { nimi, vane } from './nimi/client';
 import { setClientSettings } from './lib/config/clientRegistry';
 import ThemeProvider from './components/theme/Provider';
-import Sidebar from './components/Sidebar';
-import ChatWindow from './components/ChatWindow';
-import { ChatProvider } from './lib/hooks/useChat';
-import Library from './app/library/page';
-import Discover from './app/discover/page';
-import SettingsPage from './nimi/settings-page';
+import { VaneClientProvider } from './nimi/client-context';
+import { Workspace } from './workspace';
 import './app/globals.css';
 
 function connectionErrorMessage(error: unknown): string {
@@ -82,23 +77,7 @@ function AppGate({ children }: { children: ReactNode }) {
 createRoot(document.getElementById('root')!).render(
   <ThemeProvider>
     <AppGate>
-      <HashRouter>
-        <ChatProvider>
-          <Sidebar>
-            <Routes>
-              <Route path="/" element={<ChatWindow />} />
-              <Route path="/c/:chatId" element={<ChatWindow />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route
-                path="*"
-                element={<p className="p-8">Page not found.</p>}
-              />
-            </Routes>
-          </Sidebar>
-        </ChatProvider>
-      </HashRouter>
+      <VaneClientProvider client={{...vane,kind:'desktop'}}><Workspace/></VaneClientProvider>
     </AppGate>
     <Toaster />
   </ThemeProvider>,

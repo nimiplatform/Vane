@@ -12,6 +12,8 @@ import {
 import jsPDF from 'jspdf';
 import { useChat, Section } from '@/lib/hooks/useChat';
 import { SourceBlock } from '@/lib/types';
+import { Link } from 'react-router-dom';
+import { markdownExportText } from './MessageRenderer/export-text';
 
 const downloadFile = (filename: string, content: string, type: string) => {
   const blob = new Blob([content], { type });
@@ -65,7 +67,10 @@ const exportAsMarkdown = (sections: Section[], title: string) => {
       md += `\n**Citations:**\n`;
       sourceResponseBlock.data.forEach((src: any, i: number) => {
         const url = src.metadata?.url || '';
-        md += `- [${i + 1}] [${url}](${url})\n`;
+        if (url.startsWith('file_id://')) {
+          md += `- [${i + 1}] ${src.metadata.fileName || src.metadata.title || 'Uploaded document'} (uploaded document)\n`;
+          if (src.content) md += `\n> ${String(src.content).replace(/\n/g, '\n> ')}\n\n`;
+        } else md += `- [${i + 1}] [${url}](${url})\n`;
       });
     }
   });
@@ -143,7 +148,7 @@ const exportAsPDF = (sections: Section[], title: string) => {
       doc.setTextColor(30);
       doc.setFontSize(12);
       const assistantLines = doc.splitTextToSize(
-        section.parsedTextBlocks.join('\n'),
+        markdownExportText(section.parsedTextBlocks.join('\n')),
         180,
       );
       for (let i = 0; i < assistantLines.length; i++) {
@@ -178,8 +183,13 @@ const exportAsPDF = (sections: Section[], title: string) => {
             doc.addPage();
             y = 15;
           }
-          doc.text(`- [${i + 1}] ${url}`, 15, y);
-          y += 5;
+          const sourceText = url.startsWith('file_id://')
+            ? `${src.metadata.fileName || src.metadata.title || 'Uploaded document'} (uploaded document)\n${src.content || ''}`
+            : url;
+          for (const line of doc.splitTextToSize(`- [${i + 1}] ${sourceText}`, 175)) {
+            if (y > pageHeight - 15) { doc.addPage(); y = 15; }
+            doc.text(line, 15, y); y += 5;
+          }
         });
         doc.setTextColor(30);
       }
@@ -234,16 +244,17 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className="sticky -mx-4 lg:mx-0 top-0 z-40 bg-light-primary/95 dark:bg-dark-primary/95 backdrop-blur-sm border-b border-light-200/50 dark:border-dark-200/30">
+    <div className="vane-chat-toolbar sticky -mx-4 lg:mx-0 top-0 z-40 bg-light-primary/95 dark:bg-dark-primary/95 backdrop-blur-sm border-b border-light-200/50 dark:border-dark-200/30">
       <div className="px-4 lg:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center min-w-0">
-            <a
-              href="/"
+            <Link
+              to="/"
+              aria-label="New research"
               className="lg:hidden mr-3 p-2 -ml-2 rounded-lg hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors duration-200"
             >
               <Edit size={18} className="text-black/70 dark:text-white/70" />
-            </a>
+            </Link>
             <div className="hidden lg:flex items-center gap-2 text-black/50 dark:text-white/50 min-w-0">
               <Clock size={14} />
               <span className="text-xs whitespace-nowrap">{timeAgo} ago</span>
@@ -258,7 +269,7 @@ const Navbar = () => {
 
           <div className="flex items-center gap-1 min-w-0">
             <Popover className="relative">
-              <PopoverButton className="p-2 rounded-lg hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors duration-200">
+              <PopoverButton aria-label="Export chat" className="p-2 rounded-lg hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors duration-200">
                 <Share size={16} className="text-black/60 dark:text-white/60" />
               </PopoverButton>
               <Transition
