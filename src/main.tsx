@@ -22,17 +22,20 @@ function AppGate({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState('Connecting to Nimi…');
   const connect = async () => {
     setState('loading');
+    let step = 'Nimi account session';
     try {
       const auth = await nimi.auth.status();
       if (!auth.sessionBound)
         throw new Error(
           'Open Nimi and sign in to use Vane.',
         );
+      step = 'Vane workspace';
       await vane.ready();
+      step = 'Saved preferences';
       setClientSettings(await vane.settings.get());
       setState('ready');
     } catch (error) {
-      setMessage(connectionErrorMessage(error));
+      setMessage(`${step}: ${connectionErrorMessage(error)}`);
       setState('unavailable');
     }
   };
@@ -63,10 +66,10 @@ function AppGate({ children }: { children: ReactNode }) {
         <p className="text-sm">{message}</p>
         {state === 'unavailable' && (
           <button
-            onClick={() => void connect()}
+            onClick={() => window.location.reload()}
             className="rounded-lg bg-[#24A0ED] px-4 py-2 text-sm text-white"
           >
-            Retry Nimi connection
+            Reload and reconnect
           </button>
         )}
       </div>
