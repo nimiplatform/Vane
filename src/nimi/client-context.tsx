@@ -1,6 +1,10 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import type { vane } from './client';
-export type VaneClient = typeof vane & { kind: 'desktop' | 'web' };
+export type VaneClient = typeof vane & {
+  kind: 'desktop' | 'web';
+  readonly scopeKey?: string;
+  readonly workspaceKey?: string;
+};
 const context = createContext<VaneClient | null>(null);
 export function VaneClientProvider({
   client,

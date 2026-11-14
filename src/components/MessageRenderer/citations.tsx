@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from 'react';
 import { RuleType, type MarkdownToJSX } from 'markdown-to-jsx/react';
 import Citation from './Citation';
 
-type Source = { metadata: { url?: string } };
+type Source = { metadata: { url?: string; fileName?: string; title?: string } };
 
 /** Render references after Markdown parsing, without rewriting code or links. */
 export function createCitationRenderRule(
@@ -36,11 +36,13 @@ export function createCitationRenderRule(
       } else {
         numbers.forEach((value, index) => {
           const href = sources[Number(value) - 1]?.metadata.url;
+          const source = sources[Number(value) - 1]?.metadata;
           parts.push(
             href ? (
               <Citation
                 key={`${match.index}-${index}`}
                 href={href}
+                label={`Open source ${value}: ${source?.fileName || source?.title || href}`}
                 onOpenFile={onOpenFile}
               >
                 {value}

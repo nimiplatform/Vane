@@ -6,12 +6,13 @@ import Optimization from './MessageInputActions/Optimization';
 import Attach from './MessageInputActions/Attach';
 import { useChat } from '@/lib/hooks/useChat';
 import ModelSelector from './MessageInputActions/ChatModelSelector';
+import { useDocumentComposerDraft } from '@/nimi/document-selection';
 
 const EmptyChatMessageInput = () => {
   const { sendMessage, uploadingFiles } = useChat();
 
   /* const [copilotEnabled, setCopilotEnabled] = useState(false); */
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useDocumentComposerDraft('question');
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -32,7 +33,7 @@ const EmptyChatMessageInput = () => {
 
     document.addEventListener('keydown', handleKeyDown);
 
-    inputRef.current?.focus();
+    if (window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus();
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);

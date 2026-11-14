@@ -49,7 +49,7 @@ export async function createRemoteVane(
     throw new Error(
       rows.length
         ? 'More than one Vane workspace is permitted. Keep the intended PC workspace permission in Home.'
-        : 'Open Vane on your PC, then allow this browser to use “Vane PC research workspace” in Home → Integrations.',
+        : 'Open Vane on your PC, then allow this App to use “Vane PC research workspace” in Home → Integrations.',
     );
   const targetRef = rows[0]!.targetRef;
   async function raw(
@@ -166,6 +166,8 @@ export async function createRemoteVane(
   };
   return {
     kind: 'web',
+    scopeKey: scope.viewKey,
+    workspaceKey: targetRef,
     ready: async () => targetRef,
     aiConfig: { get: pcModels, overwrite: pcModels, listOptions: pcModels },
     settings: {

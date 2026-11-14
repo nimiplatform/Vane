@@ -5,12 +5,13 @@ import { useEffect, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import AttachSmall from './MessageInputActions/AttachSmall';
 import { useChat } from '@/lib/hooks/useChat';
+import { useDocumentComposerDraft } from '@/nimi/document-selection';
 
 const MessageInput = () => {
   const { loading, uploadingFiles, sendMessage, cancel } = useChat();
 
   const [copilotEnabled, setCopilotEnabled] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useDocumentComposerDraft('follow-up');
   const [textareaRows, setTextareaRows] = useState(1);
   const [mode, setMode] = useState<'multi' | 'single'>('single');
 
@@ -77,7 +78,18 @@ const MessageInput = () => {
         className="transition bg-transparent dark:placeholder:text-white/50 placeholder:text-sm text-sm dark:text-white resize-none focus:outline-none w-full px-2 max-h-24 lg:max-h-36 xl:max-h-48 flex-grow flex-shrink"
         placeholder="Ask a follow-up"
       />
-      {loading && <button type="button" aria-label="Stop research" onClick={() => void cancel().catch((error) => toast.error(error.message))} className="rounded-full bg-light-200 p-2 dark:bg-dark-200"><Square size={17} /></button>}
+      {loading && (
+        <button
+          type="button"
+          aria-label="Stop research"
+          onClick={() =>
+            void cancel().catch((error) => toast.error(error.message))
+          }
+          className="rounded-full bg-light-200 p-2 dark:bg-dark-200"
+        >
+          <Square size={17} />
+        </button>
+      )}
       {mode === 'single' && (
         <button
           aria-label="Send follow-up"

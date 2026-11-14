@@ -1,5 +1,18 @@
 'use client';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider, useTheme } from 'next-themes';
+import { NimiThemeProvider } from '@nimiplatform/kit/ui';
+
+function KitTheme({ children }: { children: React.ReactNode }) {
+  const { resolvedTheme } = useTheme();
+  return (
+    <NimiThemeProvider
+      scheme={resolvedTheme === 'light' ? 'light' : 'dark'}
+      accentPack="nimi-accent"
+    >
+      {children}
+    </NimiThemeProvider>
+  );
+}
 
 const ThemeProviderComponent = ({
   children,
@@ -8,7 +21,7 @@ const ThemeProviderComponent = ({
 }) => {
   return (
     <ThemeProvider attribute="class" enableSystem={false} defaultTheme="dark">
-      {children}
+      <KitTheme>{children}</KitTheme>
     </ThemeProvider>
   );
 };

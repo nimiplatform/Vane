@@ -1,6 +1,6 @@
 import { Clock, Edit, Share, Trash, FileText, FileDown } from 'lucide-react';
 import { Message } from './ChatWindow';
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, useRef, Fragment } from 'react';
 import { formatTimeDifference } from '@/lib/utils';
 import DeleteChat from './DeleteChat';
 import {
@@ -13,26 +13,16 @@ import jsPDF from 'jspdf';
 import { useChat, Section } from '@/lib/hooks/useChat';
 import { SourceBlock } from '@/lib/types';
 import { Link } from 'react-router-dom';
+import { exportFile } from '@/nimi/export-file';
+import { toast } from 'sonner';
 import { markdownExportText } from './MessageRenderer/export-text';
 
-const downloadFile = (filename: string, content: string, type: string) => {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 0);
-};
-
-const exportAsMarkdown = (sections: Section[], title: string) => {
-  const date = new Date(
-    sections[0].message.createdAt || Date.now(),
-  ).toLocaleString();
+const exportAsMarkdown = (
+  sections: Section[],
+  title: string,
+  signal: AbortSignal,
+) => {
+  const date = new Date().toLocaleString();
   let md = `# 💬 Chat Export: ${title}\n\n`;
   md += `*Exported on: ${date}*\n\n---\n`;
 
@@ -69,20 +59,27 @@ const exportAsMarkdown = (sections: Section[], title: string) => {
         const url = src.metadata?.url || '';
         if (url.startsWith('file_id://')) {
           md += `- [${i + 1}] ${src.metadata.fileName || src.metadata.title || 'Uploaded document'} (uploaded document)\n`;
-          if (src.content) md += `\n> ${String(src.content).replace(/\n/g, '\n> ')}\n\n`;
+          if (src.content)
+            md += `\n> ${String(src.content).replace(/\n/g, '\n> ')}\n\n`;
         } else md += `- [${i + 1}] [${url}](${url})\n`;
       });
     }
   });
   md += '\n---\n';
-  downloadFile(`${title || 'chat'}.md`, md, 'text/markdown');
+  return exportFile(
+    new Blob([md], { type: 'text/markdown;charset=utf-8' }),
+    `${title || 'chat'}.md`,
+    signal,
+  );
 };
 
-const exportAsPDF = (sections: Section[], title: string) => {
+const exportAsPDF = (
+  sections: Section[],
+  title: string,
+  signal: AbortSignal,
+) => {
   const doc = new jsPDF();
-  const date = new Date(
-    sections[0]?.message?.createdAt || Date.now(),
-  ).toLocaleString();
+  const date = new Date().toLocaleString();
   let y = 15;
   const pageHeight = doc.internal.pageSize.height;
   doc.setFontSize(18);
@@ -186,9 +183,16 @@ const exportAsPDF = (sections: Section[], title: string) => {
           const sourceText = url.startsWith('file_id://')
             ? `${src.metadata.fileName || src.metadata.title || 'Uploaded document'} (uploaded document)\n${src.content || ''}`
             : url;
-          for (const line of doc.splitTextToSize(`- [${i + 1}] ${sourceText}`, 175)) {
-            if (y > pageHeight - 15) { doc.addPage(); y = 15; }
-            doc.text(line, 15, y); y += 5;
+          for (const line of doc.splitTextToSize(
+            `- [${i + 1}] ${sourceText}`,
+            175,
+          )) {
+            if (y > pageHeight - 15) {
+              doc.addPage();
+              y = 15;
+            }
+            doc.text(line, 15, y);
+            y += 5;
           }
         });
         doc.setTextColor(30);
@@ -203,12 +207,38 @@ const exportAsPDF = (sections: Section[], title: string) => {
       y += 4;
     }
   });
-  doc.save(`${title || 'chat'}.pdf`);
+  return exportFile(doc.output('blob'), `${title || 'chat'}.pdf`, signal);
 };
 
 const Navbar = () => {
   const [title, setTitle] = useState<string>('');
   const [timeAgo, setTimeAgo] = useState<string>('');
+  const [exporting, setExporting] = useState(false);
+  const exportLifetime = useRef<AbortController>(undefined);
+  useEffect(() => {
+    const control = new AbortController();
+    exportLifetime.current = control;
+    return () => control.abort();
+  }, []);
+  const deliver = async (kind: 'markdown' | 'pdf') => {
+    const signal = exportLifetime.current?.signal;
+    if (!signal || signal.aborted || exporting) return;
+    setExporting(true);
+    try {
+      await (kind === 'markdown' ? exportAsMarkdown : exportAsPDF)(
+        sections,
+        title,
+        signal,
+      );
+    } catch (error) {
+      if (!signal.aborted)
+        toast.error(
+          error instanceof Error ? error.message : 'Export could not be saved.',
+        );
+    } finally {
+      if (!signal.aborted) setExporting(false);
+    }
+  };
 
   const { sections, chatId } = useChat();
 
@@ -269,7 +299,10 @@ const Navbar = () => {
 
           <div className="flex items-center gap-1 min-w-0">
             <Popover className="relative">
-              <PopoverButton aria-label="Export chat" className="p-2 rounded-lg hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors duration-200">
+              <PopoverButton
+                aria-label="Export chat"
+                className="p-2 rounded-lg hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors duration-200"
+              >
                 <Share size={16} className="text-black/60 dark:text-white/60" />
               </PopoverButton>
               <Transition
@@ -291,7 +324,8 @@ const Navbar = () => {
                     <div className="space-y-1">
                       <button
                         className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-xl hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors duration-200"
-                        onClick={() => exportAsMarkdown(sections, title || '')}
+                        disabled={exporting || sections.length === 0}
+                        onClick={() => void deliver('markdown')}
                       >
                         <FileText size={16} className="text-[#24A0ED]" />
                         <div>
@@ -305,7 +339,8 @@ const Navbar = () => {
                       </button>
                       <button
                         className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-xl hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors duration-200"
-                        onClick={() => exportAsPDF(sections, title || '')}
+                        disabled={exporting || sections.length === 0}
+                        onClick={() => void deliver('pdf')}
                       >
                         <FileDown size={16} className="text-[#24A0ED]" />
                         <div>

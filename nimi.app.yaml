@@ -1,6 +1,6 @@
 app_id: nimiplatform.vane
 display_name: Vane
-version: 0.1.9
+version: 0.1.10
 profile: standalone
 manifest_role: submitted-input
 app_access:
@@ -49,6 +49,8 @@ metadata:
   icon: public/icon.png
   release_notes: RELEASE_NOTES.md
 local_development:
+  mobile:
+    command: pnpm run dev:android
   web:
     command: pnpm run dev:web-renderer
     local:

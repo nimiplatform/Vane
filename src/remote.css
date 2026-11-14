@@ -1,9 +1,9 @@
 .vane-account {
-  height: 56px;
+  height: calc(56px + env(safe-area-inset-top));
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 20px;
+  padding: calc(8px + env(safe-area-inset-top)) 20px 8px;
   border-bottom: 1px solid #8884;
   background: var(--nimi-bg-base, #fff);
   color: var(--nimi-text-primary, #111);
@@ -51,7 +51,7 @@
   border-radius: 8px;
 }
 .vane-remote .vane-sidebar {
-  top: 56px;
+  top: calc(56px + env(safe-area-inset-top));
 }
 .vane-remote .min-h-screen {
   min-height: calc(100dvh - 110px);
@@ -59,7 +59,7 @@
 .vane-remote main {
   padding-bottom: 100px;
 }
-.vane-remote .vane-chat-toolbar{top:56px}
+.vane-remote .vane-chat-toolbar{top:calc(56px + env(safe-area-inset-top))}
 .vane-remote .vane-library {
   overflow-wrap: anywhere;
 }
@@ -90,3 +90,8 @@
     overflow: auto;
   }
 }
+
+.vane-remote .vane-mobile-nav{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+.vane-remote main{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+.vane-remote .vane-home-content{min-height:0;padding-top:64px;padding-bottom:24px}
+.vane-remote .vane-home-title{margin-top:0}

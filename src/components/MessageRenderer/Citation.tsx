@@ -2,14 +2,17 @@ const Citation = ({
   href,
   children,
   onOpenFile,
+  label,
 }: {
   href: string;
   children: React.ReactNode;
   onOpenFile: (url: string) => void;
+  label?: string;
 }) => {
   return (
     <a
       href={href}
+      aria-label={label}
       target="_blank"
       onClick={(event) => {
         if (href.startsWith('file_id://')) {

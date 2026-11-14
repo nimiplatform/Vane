@@ -80,6 +80,7 @@ const MessageBox = ({
   const hasContent = section.parsedTextBlocks.length > 0;
 
   const { speechStatus, start, stop } = useSpeech({ text: speechMessage });
+  const supportsSpeech=typeof window!=='undefined'&&!!window.speechSynthesis;
 
   const renderCitation = createCitationRenderRule(sources, openFile);
   const markdownOverrides: MarkdownToJSX.Options = {
@@ -250,6 +251,8 @@ const MessageBox = ({
                     <div className="flex flex-row items-center -mr-2">
                       <Copy initialMessage={parsedMessage} section={section} />
                       <button
+                        disabled={!supportsSpeech}
+                        title={supportsSpeech?undefined:'Read aloud is unavailable on this device'}
                         aria-label={speechStatus === 'started' ? 'Stop reading answer' : 'Read answer aloud'}
                         onClick={() => {
                           if (speechStatus === 'started') {
@@ -269,6 +272,7 @@ const MessageBox = ({
                     </div>
                   </div>
                 )}
+                {!supportsSpeech && hasContent && <p className="text-xs text-black/60 dark:text-white/60">Read aloud is unavailable on this device. You can copy or export the answer.</p>}
 
                 {isLast &&
                   section.suggestions &&

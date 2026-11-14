@@ -5,11 +5,13 @@ import { ChatProvider } from './lib/hooks/useChat';
 import Library from './app/library/page';
 import Discover from './app/discover/page';
 import SettingsPage from './nimi/settings-page';
+import { DocumentSelectionTray } from './nimi/document-selection';
 export function Workspace() {
   return (
     <HashRouter>
       <ChatProvider>
         <Sidebar>
+          <DocumentSelectionTray />
           <Routes>
             <Route path="/" element={<ChatWindow />} />
             <Route path="/c/:chatId" element={<ChatWindow />} />

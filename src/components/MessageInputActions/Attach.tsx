@@ -1,3 +1,5 @@
+import { useDocumentSelection } from '@/nimi/document-selection';
+import { useLocation } from 'react-router-dom';
 import { useVane } from '@/nimi/client-context';
 import { cn } from '@/lib/utils';
 import {
@@ -23,10 +25,32 @@ import { toast } from 'sonner';
 
 const Attach = () => {
   const vane = useVane();
-  const { files, setFiles, setFileIds, fileIds, setUploadingFiles } = useChat();
+  const {
+    files,
+    setFiles,
+    setFileIds,
+    fileIds,
+    setUploadingFiles,
+    uploadingFiles,
+    sources,
+    optimizationMode,
+  } = useChat();
 
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<any>(null);
+  const picker = useDocumentSelection();
+  const location = useLocation();
+  const choose = () =>
+    picker
+      ? picker.choose({
+          route: location.pathname,
+          scope: vane.scopeKey!,
+          workspace: vane.workspaceKey!,
+          attached: files,
+          sources,
+          mode: optimizationMode,
+        })
+      : fileInputRef.current.click();
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -90,21 +114,25 @@ const Attach = () => {
                     <div className="flex flex-row items-center space-x-4">
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current.click()}
+                        disabled={!!picker && uploadingFiles}
+                        onClick={choose}
                         className="flex flex-row items-center space-x-1 text-black/70 dark:text-white/70 hover:text-black hover:dark:text-white transition duration-200 focus:outline-none"
                       >
-                        <input
-                          type="file"
-                          onChange={handleChange}
-                          ref={fileInputRef}
-                          accept=".pdf,.docx,.txt"
-                          multiple
-                          hidden
-                        />
+                        {!picker && (
+                          <input
+                            type="file"
+                            onChange={handleChange}
+                            ref={fileInputRef}
+                            accept=".pdf,.docx,.txt"
+                            multiple
+                            hidden
+                          />
+                        )}
                         <Plus size={16} />
                         <p className="text-xs">Add</p>
                       </button>
                       <button
+                        disabled={!!picker && uploadingFiles}
                         onClick={() => {
                           setFiles([]);
                           setFileIds([]);
@@ -152,19 +180,22 @@ const Attach = () => {
     <button
       type="button"
       aria-label="Attach files"
-      onClick={() => fileInputRef.current.click()}
+      disabled={!!picker && uploadingFiles}
+      onClick={choose}
       className={cn(
         'flex items-center justify-center active:border-none hover:bg-light-200 hover:dark:bg-dark-200 p-2 rounded-lg focus:outline-none headless-open:text-black dark:headless-open:text-white text-black/50 dark:text-white/50 active:scale-95 transition duration-200 hover:text-black dark:hover:text-white',
       )}
     >
-      <input
-        type="file"
-        onChange={handleChange}
-        ref={fileInputRef}
-        accept=".pdf,.docx,.txt"
-        multiple
-        hidden
-      />
+      {!picker && (
+        <input
+          type="file"
+          onChange={handleChange}
+          ref={fileInputRef}
+          accept=".pdf,.docx,.txt"
+          multiple
+          hidden
+        />
+      )}
       <Paperclip size={16} />
     </button>
   );
