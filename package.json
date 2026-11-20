@@ -8,6 +8,7 @@
     "dev:web": "nimi-app dev --platform web",
     "dev:web-renderer": "vite --config vite.web.config.ts",
     "build:web": "vite build --config vite.web.config.ts",
+    "build:web:release": "pnpm run typecheck && vite build --config vite.web.config.ts --mode web-release",
     "build": "vite build",
     "format:write": "prettier . --write",
     "build:electron": "node scripts/build-electron.mjs",
@@ -29,8 +30,6 @@
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "@nimiplatform/kit": "^0.24.0-rc.1",
-    "@nimiplatform/sdk": "^0.24.0-rc.2",
     "js-tiktoken": "^1.0.21",
     "jsdom": "^29.0.1",
     "mathjs": "^15.1.0",
@@ -45,15 +44,15 @@
     "@capacitor/android": "8.6.0",
     "@capacitor/core": "8.6.0",
     "@capacitor/app": "8.1.2",
-    "@capacitor/browser": "8.0.5"
+    "@capacitor/browser": "8.0.5",
+    "@nimiplatform/sdk": "^0.24.0-rc.10",
+    "@nimiplatform/kit": "^0.24.0-rc.16"
   },
   "devDependencies": {
     "@electron/packager": "^20.3.0",
     "@headlessui/react": "^2.2.0",
     "@headlessui/tailwindcss": "^0.2.2",
     "@icons-pack/react-simple-icons": "^12.3.0",
-    "@nimiplatform/app-tools": "^0.16.0-rc.2",
-    "@nimiplatform/nimi-coding": "0.7.0",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/typography": "^0.5.12",
@@ -69,7 +68,7 @@
     "autoprefixer": "^10.0.1",
     "axios": "^1.8.3",
     "clsx": "^2.1.0",
-    "electron": "^45.0.0",
+    "electron": "^45.4.1",
     "esbuild": "^0.28.2",
     "jspdf": "^4.2.1",
     "lightweight-charts": "^5.0.9",
@@ -88,9 +87,11 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",
-    "vite": "^8.3.3",
+    "vite": "^8.3.8",
     "yet-another-react-lightbox": "^3.17.2",
-    "@capacitor/cli": "8.6.0"
+    "@capacitor/cli": "8.6.0",
+    "@nimiplatform/app-tools": "^0.16.0-rc.10",
+    "@nimiplatform/nimi-coding": "0.7.0"
   },
   "optionalDependencies": {
     "@napi-rs/canvas": "^0.1.87"

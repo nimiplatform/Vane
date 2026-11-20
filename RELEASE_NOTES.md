@@ -1,3 +1,11 @@
+# 0.1.10 — Scoped Web research workspace and Nimi 0.24 RC packages
+
+Adds the scoped `vane.research.v1` PC workspace Integration provider and static Web client (`public_slug: vane`, `build:web:release`), plus local Android preview support, using published npm pre-release packages (`@nimiplatform/sdk` 0.24.0-rc.10, `@nimiplatform/kit` and protected native carriers 0.24.0-rc.16, `@nimiplatform/app-tools` 0.16.0-rc.10, `@nimiplatform/nimi-coding` 0.7.0, Electron 45.4.1) with no local tarball overrides.
+
+- PC Vane continues to own research steps, SearxNG queries, document indexing/retrieval, embedding-space checks and managed storage.
+- Web connects with the same Nimi account after PC Home source confirmation and `vane.research.v1` Integration approval; model selection and the SearxNG URL remain PC-only controls.
+- Requires PC Vane 0.1.10+ (Catalog 0.1.8 declares only `runtime.consume` and does not provide `vane.research.v1`) and a matching Nimi Home/Runtime (`0.2.5-rc.11` / `0.24` line). Public release and Registry admission remain separate steps.
+
 # 0.1.7 — Windows document research
 
 Uses published SDK 0.21.0, Kit/native 0.19.3 and App Tools 0.12.2. Research uses automatic tool choice while still rejecting a completed step without a declared action. Document processing blocks submission until the attachment is ready, preserving the query and its file context. Windows development and the locally imported installation passed document indexing, cited Chinese answers and saved-chat restoration after closing and reopening the App. The installed workflow used qwen3.8-flash and text-embedding-v4 with Nimi 0.2.3-rc.2; MiMo's unsupported structured-output combination is recorded separately. Web search needs a configured SearxNG service, and Catalog installation of this version remains a separate delivery step.

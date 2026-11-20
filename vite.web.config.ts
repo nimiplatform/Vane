@@ -21,6 +21,7 @@ export default defineConfig(({ command, mode }) =>
       root: import.meta.dirname,
       env: { ...loadEnv(mode, import.meta.dirname, ''), ...process.env },
       serve: command === 'serve',
+      release: mode === 'web-release',
     }),
   ),
 );
