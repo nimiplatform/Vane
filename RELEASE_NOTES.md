@@ -4,7 +4,7 @@ Adds the scoped `vane.research.v1` PC workspace Integration provider and static 
 
 - PC Vane continues to own research steps, SearxNG queries, document indexing/retrieval, embedding-space checks and managed storage.
 - Web connects with the same Nimi account after PC Home source confirmation and `vane.research.v1` Integration approval; model selection and the SearxNG URL remain PC-only controls.
-- Requires PC Vane 0.1.10+ (Catalog 0.1.8 declares only `runtime.consume` and does not provide `vane.research.v1`) and a matching Nimi Home/Runtime (`0.2.5-rc.11` / `0.24` line). Public release and Registry admission remain separate steps.
+- Web research requires PC Vane 0.1.10 or later and a Nimi Home/Runtime that supports remote App connections and workspace Integrations. PC Vane 0.1.8 lacks the research workspace provider.
 
 # 0.1.7 — Windows document research
 
